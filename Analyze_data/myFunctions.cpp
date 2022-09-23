@@ -521,6 +521,11 @@ void AbsoluteXSecScaling(TH1D* h, TString Sample, TString Nucleus, TString E) {
 
 	}
 
+	else  if(Sample == "SF") {
+                SF = (SFGenieXsec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
+                                        ConversionFactorCm2ToMicroBarn / (SFNumberEvents[std::make_pair(Nucleus, E)] ) );
+        }
+
 //	else if (Sample == "G18_02c NoRad") { 
 
 //		SF = ( G18_02cGenieXSec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
@@ -647,6 +652,13 @@ void AbsoluteXSec2DScaling(TH2D* h, TString Sample, TString Nucleus, TString E) 
 					dOmega) );
 
 	}	
+
+	if(Sample == "SF") {
+		SF = (SFGenieXsec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
+                                        ConversionFactorCm2ToMicroBarn / (SFNumberEvents[std::make_pair(Nucleus, E)] *\
+                                        dOmega) );
+	}
+
 
 	h->Scale(SF);
 

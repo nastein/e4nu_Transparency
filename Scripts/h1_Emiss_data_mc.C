@@ -44,8 +44,8 @@ void h1_Emiss_data_mc( int range){
     std::string file_name1;
     std::string file_name2;
  
-    file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/Analyze_data/C12_2261_Genie_1_C12_2.261000.root";
-    file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/Analyze_data/C12_2261_Data__C12_2.261000.root";
+    file_name2 = "../Analyze_data/test2Data__C12_2.261000.root";
+    file_name1 = "../Analyze_data/test2Genie_1_C12_2.261000.root";
 
     TFile *input1 = TFile::Open( TString(file_name1));
     TFile *input2 = TFile::Open( TString(file_name2));
@@ -62,146 +62,192 @@ void h1_Emiss_data_mc( int range){
     info2 = parse2[0];
     cuts2 = parse2[1];
 
-    std::string run_type1 = std::string(((TNamed*)Run_Info1->FindObject("Run type"))->GetTitle());
-    std::string run_type2 = std::string(((TNamed*)Run_Info2->FindObject("Run type"))->GetTitle());
-
-    // declare variables that will be used in the plotting/formatting of histograms and file names
-    std::string target ("invalid");
-    std::string target_plot ("invalid");
-    std::string beam_energy ("invalid");
-    std::string beam_energy_plot ("invalid");
-    std::string elSectors ("invalid");
-    std::string elSectors_plot ("invalid");
-    std::string deltaPhiEl ("invalid");
-    std::string thetaEl_lb ("invalid");
-    std::string thetaEl_ub ("invalid");
-    std::string elMom_lb ("invalid");
-    std::string elMom_lb_plot ("invalid");
-    std::string protSectors ("invalid");
-    std::string protSectors_plot ("invalid");
-    std::string deltaPhiProt ("invalid");
-    std::string thetaProt_lb ("invalid");
-    std::string thetaProt_ub ("invalid");
-    std::string protMom_lb ("invalid");
-    std::string protMom_lb_plot ("invalid");
 
     // histogram initialization
-    TH1F* h1_Emiss_mc[4];
     TH1F* h1_Emiss_mc_total;
     TH1F* h1_Emiss_InteractionBreakDown_inSector_mc[4][6];
-
-      // histogram initialization
     TH1F* h1_Emiss_data[6];
 
-    THStack *hs = new THStack("hs","Stacked 1D histograms");
+    TH1F* h1_Pmiss_mc_total;
+    TH1F* h1_Pmiss_InteractionBreakDown_inSector_mc[4][6];
+    TH1F* h1_Pmiss_data[6];
 
-    //if (run_type.find("Genie") !=  string::npos) { // GENIE MC is separated into sectors and interactions
+    TH2F* h1_EmissPmiss_mc_total;
+    TH2F* h1_EmissPmiss_InteractionBreakDown_inSector_mc[4][6];
+    TH2F* h1_EmissPmiss_data[6];
+
+
 	for (int i = 0; i < 4; i++) { // for all the interactions
 	    for (int j = 0; j < 6; j++) { // for all the sectors
     		// extract the histrograms
-    		h1_Emiss_InteractionBreakDown_inSector_mc[i][j] = (TH1F*)input1->Get(TString::Format("h1_Int_%i_Sect_%i_Em", i+1, j));
-    		h1_Emiss_InteractionBreakDown_inSector_mc[i][j]->Rebin(10);	    
+    		h1_Emiss_InteractionBreakDown_inSector_mc[i][j] = (TH1F*)input1->Get(TString::Format("h1_Int_%i_Sect_%i_Em", i+1, j));    
     	    //Add everything to the first sector
-            if(j == 0) continue;
-            h1_Emiss_InteractionBreakDown_inSector_mc[i][0]->Add(h1_Emiss_InteractionBreakDown_inSector_mc[i][j]);
+            if(i == 0 && j == 0) h1_Emiss_mc_total = (TH1F*)h1_Emiss_InteractionBreakDown_inSector_mc[i][j]->Clone();
+            else h1_Emiss_mc_total->Add(h1_Emiss_InteractionBreakDown_inSector_mc[i][j]);
 	    
+	   }
 	}
 
-	}
-
-    h1_Emiss_mc_total = h1_Emiss_InteractionBreakDown_inSector_mc[0][0];
-
-
-    for (int j = 0; j < 4; j++) {
-        h1_Emiss_mc[j] = h1_Emiss_InteractionBreakDown_inSector_mc[j][0];
-        if(j == 0) continue;
-        h1_Emiss_mc_total->Add(h1_Emiss_mc[j]);
-
-    }
-	
     for (int i = 0; i < 6; i++) { // for all the sectors
 		h1_Emiss_data[i] = (TH1F*)input2->Get( TString::Format("h1_Int_0_Sect_%i_Em", i));
-		h1_Emiss_data[i]->Rebin(10);
     }
-
-
 
     // compile all the sectors into one histogram
     for( int i = 1; i < 6; i++) { 
        h1_Emiss_data[0]->Add( h1_Emiss_data[i]); 
     }
 
-    // create a canvas on which to draw the histograms
-    TCanvas* c;
-    c = new TCanvas(TString::Format("c"), TString::Format("c"), 800, 600);
-
     double norm = h1_Emiss_data[0]->Integral()/h1_Emiss_mc_total->Integral();
     std::cout << "normalizing factor = " << norm << "\n";
     h1_Emiss_mc_total->Scale(norm);
 
-    const int color_options[4] = {kBlue, kAzure+10, kGreen-3, kViolet};
-    // format the histograms
-	/*    
-for(int j = 0; j < 4; j++) {
-        h1_Emiss_mc[j]->Sumw2();
-        h1_Emiss_mc[j]->Scale(norm); // normalize the mc to the data
-        h1_Emiss_mc[j]->SetLineColor(color_options[j]);
-        hs->Add(h1_Emiss_mc[j]);
+    for (int i = 0; i < 4; i++) { // for all the interactions
+        for (int j = 0; j < 6; j++) { // for all the sectors
+            // extract the histrograms
+            h1_Pmiss_InteractionBreakDown_inSector_mc[i][j] = (TH1F*)input1->Get(TString::Format("h1_Int_%i_Sect_%i_Pm", i+1, j));    
+            //Add everything to the first sector
+            if(i == 0 && j == 0) h1_Pmiss_mc_total = (TH1F*)h1_Pmiss_InteractionBreakDown_inSector_mc[i][j]->Clone();
+            else h1_Pmiss_mc_total->Add(h1_Pmiss_InteractionBreakDown_inSector_mc[i][j]);
+        
+       }
     }
-    */
-      // format the histograms
+
+    for (int i = 0; i < 6; i++) { // for all the sectors
+        h1_Pmiss_data[i] = (TH1F*)input2->Get( TString::Format("h1_Int_0_Sect_%i_Pm", i));
+    }
+
+    // compile all the sectors into one histogram
+    for( int i = 1; i < 6; i++) { 
+       h1_Pmiss_data[0]->Add( h1_Pmiss_data[i]); 
+    }
+
+    norm = h1_Pmiss_data[0]->Integral()/h1_Pmiss_mc_total->Integral();
+    std::cout << "normalizing factor = " << norm << "\n";
+    h1_Pmiss_mc_total->Scale(norm);
+
+    for (int i = 0; i < 4; i++) { // for all the interactions
+        for (int j = 0; j < 6; j++) { // for all the sectors
+            // extract the histrograms
+            h1_EmissPmiss_InteractionBreakDown_inSector_mc[i][j] = (TH2F*)input1->Get(TString::Format("h2_Int_%i_Sect_%i_EmPm", i+1, j));    
+            //Add everything to the first sector
+            if(i == 0 && j == 0) h1_EmissPmiss_mc_total = (TH2F*)h1_EmissPmiss_InteractionBreakDown_inSector_mc[i][j]->Clone();
+            else h1_EmissPmiss_mc_total->Add(h1_EmissPmiss_InteractionBreakDown_inSector_mc[i][j]);
+        
+       }
+    }
+
+    for (int i = 0; i < 6; i++) { // for all the sectors
+        h1_EmissPmiss_data[i] = (TH2F*)input2->Get( TString::Format("h2_Int_0_Sect_%i_EmPm", i));
+    }
+
+    // compile all the sectors into one histogram
+    for( int i = 1; i < 6; i++) { 
+       h1_EmissPmiss_data[0]->Add( h1_EmissPmiss_data[i]); 
+    }
+
+    norm = h1_EmissPmiss_data[0]->Integral()/h1_EmissPmiss_mc_total->Integral();
+    std::cout << "normalizing factor = " << norm << "\n";
+    h1_EmissPmiss_mc_total->Scale(norm);
+
+    // create a canvas on which to draw the histograms
+    
+
+    const int color_options[4] = {kBlue, kAzure+10, kGreen-3, kViolet};
+
+    TCanvas* c;
+    c = new TCanvas(TString::Format("c"), TString::Format("c"), 800, 600);
+    // format the histograms
     h1_Emiss_data[0]->Sumw2();
     h1_Emiss_data[0]->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
     h1_Emiss_data[0]->GetXaxis()->SetTitle("Missing Energy [MeV]");
     h1_Emiss_data[0]->GetYaxis()->SetTitle("Events");
-    //h1_Emiss_data[0]->GetXaxis()->SetRangeUser( 0, 200);
     h1_Emiss_data[0]->GetXaxis()->CenterTitle( true);
     h1_Emiss_data[0]->GetYaxis()->CenterTitle( true);
     h1_Emiss_data[0]->SetTitle(TString(info2)+TString(cuts2));
     h1_Emiss_data[0]->SetMarkerStyle(2);
     h1_Emiss_data[0]->SetMarkerColor(kBlack);
-    //h1_Emiss_data[0]->GetYaxis()->SetRangeUser(0,2000);
-   // h1_Emiss_data[0]->GetXaxis()->SetRangeUser(0,200);
-    //hs->GetXaxis()->SetRangeUser(0,200);
-//    h1_prot_momentum[0]->GetXaxis()->SetTitleSize( 0.06);
-//    h1_prot_momentum[0]->GetYaxis()->SetTitleSize( 0.06);
     
     h1_Emiss_mc_total->SetLineColor(kRed);
-    //h1_Emiss_mc_total->Draw("hist e same");
     h1_Emiss_data[0]->Draw("HIST E");
     h1_Emiss_mc_total->Draw("SAME");
     
     // draw a legend for our plot
     TLegend *legend = new TLegend( 0.2, 0.725, 0.35, 0.825);
     legend->AddEntry( h1_Emiss_mc_total, "SuSAv2");
-    //legend->AddEntry( h1_Emiss_mc[1], "MEC-SuSAv2");
-    //legend->AddEntry( h1_Emiss_mc[2], "RES-SuSAv2");
-    //legend->AddEntry( h1_Emiss_mc[3], "DIS-SuSAv2");
     legend->AddEntry( h1_Emiss_data[0], "CLAS data");
     legend->SetBorderSize( 0);
     legend->SetFillStyle( 0);
     legend->Draw();
-
 
     // crop the margins of the canvas
     c->SetLeftMargin( 0.14);
     c->SetBottomMargin( 0.14);
     c->Update();
 
-    // save this histogram as a PDF file
-    std::string save_file_path ("invalid");
-    save_file_path = "../output/h1_prot_mom/"+TString(info1)+TString(cuts1); 
-    //TFile *f = new TFile(TString(save_file_path),"RECREATE");
-    //cout << "File saved at: " << save_file_path << "\n";
-    //h1_prot_momentum[0]->Write();
-    //f->Close();
-    c->SaveAs(TString(save_file_path)+".pdf");
-    // smithja: this section of code integrates the distribution and prints it to the screen
-    /*
-    int num_events = h1_prot_momentum[0]->Integral();
 
-    cout << "// --- PROGRAM OUTPUT ------------------------------------------------------" << endl;
-    cout << "There are " << num_events << " many events in the h1_prot_mom histogram." << endl;
-    cout << "// -------------------------------------------------------------------------" << endl << endl; // separate program output
-    */
+    TCanvas* c2;
+    c2 = new TCanvas(TString::Format("c2"), TString::Format("c2"), 800, 600);
+    // format the histograms
+    h1_Pmiss_data[0]->Sumw2();
+    h1_Pmiss_data[0]->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
+    h1_Pmiss_data[0]->GetXaxis()->SetTitle("Missing Momentum[MeV]");
+    h1_Pmiss_data[0]->GetYaxis()->SetTitle("Events");
+    h1_Pmiss_data[0]->GetXaxis()->CenterTitle( true);
+    h1_Pmiss_data[0]->GetYaxis()->CenterTitle( true);
+    h1_Pmiss_data[0]->SetTitle(TString(info2)+TString(cuts2));
+    h1_Pmiss_data[0]->SetMarkerStyle(2);
+    h1_Pmiss_data[0]->SetMarkerColor(kBlack);
+    
+    h1_Pmiss_mc_total->SetLineColor(kRed);
+    h1_Pmiss_data[0]->Draw("HIST E");
+    h1_Pmiss_mc_total->Draw("SAME");
+    
+    // draw a legend for our plot
+    TLegend *legend2 = new TLegend( 0.2, 0.725, 0.35, 0.825);
+    legend2->AddEntry( h1_Pmiss_mc_total, "SuSAv2");
+    legend2->AddEntry( h1_Pmiss_data[0], "CLAS data");
+    legend2->SetBorderSize( 0);
+    legend2->SetFillStyle( 0);
+    legend2->Draw();
+
+    // crop the margins of the canvas
+    c2->SetLeftMargin( 0.14);
+    c2->SetBottomMargin( 0.14);
+    c2->Update();
+
+
+    TCanvas* c3;
+    c3 = new TCanvas(TString::Format("c3"), TString::Format("c3"), 800, 600);
+    c3->Divide(2,0,0,0);
+    // format the histograms
+    h1_EmissPmiss_data[0]->Sumw2();
+    h1_EmissPmiss_data[0]->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
+    h1_EmissPmiss_data[0]->GetXaxis()->SetTitle("Missing Energy [MeV]");
+    h1_EmissPmiss_data[0]->GetYaxis()->SetTitle("Missing Momentum");
+    h1_EmissPmiss_data[0]->GetXaxis()->CenterTitle( true);
+    h1_EmissPmiss_data[0]->GetYaxis()->CenterTitle( true);
+    h1_EmissPmiss_data[0]->SetTitle("CLAS data");
+    h1_EmissPmiss_data[0]->SetMarkerStyle(2);
+    //h1_EmissPmiss_data[0]->SetMarkerColor(kBlack);
+    c3->cd(1);
+    h1_EmissPmiss_data[0]->Draw("COLZ");
+
+    h1_EmissPmiss_mc_total->Sumw2();
+    h1_EmissPmiss_mc_total->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
+    h1_EmissPmiss_mc_total->GetXaxis()->SetTitle("Missing Energy [MeV]");
+    h1_EmissPmiss_mc_total->GetYaxis()->SetTitle("Missing Momentum");
+    h1_EmissPmiss_mc_total->GetXaxis()->CenterTitle( true);
+    h1_EmissPmiss_mc_total->GetYaxis()->CenterTitle( true);
+    h1_EmissPmiss_mc_total->SetTitle("SuSA v2");
+    h1_EmissPmiss_mc_total->SetMarkerStyle(2);
+    //h1_EmissPmiss_mc_total[0]->SetMarkerColor(kRed);
+    c3->cd(2);
+    h1_EmissPmiss_mc_total->Draw("COLZ");
+
+    // crop the margins of the canvas
+    c3->SetLeftMargin( 0.14);
+    c3->SetBottomMargin( 0.14);
+    c3->Update();
+
+    
 }

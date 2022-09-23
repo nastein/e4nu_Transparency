@@ -107,13 +107,13 @@ void h1_el_mom_intSeparated( std::string file_name){
     for( int i = 20; i < 24; i++){
 	// formatting statements
         h1_el_momentum[i]->Sumw2();
-        h1_el_momentum[i]->Rebin( 25);
+    //    h1_el_momentum[i]->Rebin( 25);
 //        h1_el_momentum[i]->Scale( 1./h1_el_momentum[i]->Integral(),"width"); // normalize the histogram to 1
         h1_el_momentum[i]->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
         h1_el_momentum[i]->SetLineColor( color_options[i-20]);
         h1_el_momentum[i]->GetXaxis()->SetTitle("Electron Momentum [GeV/c]");
         h1_el_momentum[i]->GetYaxis()->SetTitle("Events");
-        h1_el_momentum[i]->GetXaxis()->SetRangeUser( 0, 4);
+      //  h1_el_momentum[i]->GetXaxis()->SetRangeUser( 0, 4);
         h1_el_momentum[i]->GetXaxis()->CenterTitle( true);
         h1_el_momentum[i]->GetYaxis()->CenterTitle( true);
 //        h1_el_momentum[i]->GetXaxis()->SetTitleSize( 0.06);

@@ -84,16 +84,16 @@ void genie_analysis::Loop() {
 	bool TruthLevel1p0piSignalStudy = fSignal;
 	bool TruthLevel0piSignalStudy = false;
 
-    bool UsePhiThetaBand = false;
+        bool UsePhiThetaBand = false;
 
-    double PtMax = 0.2; // gchamber: max pt cut (1e1p spectrum)
+        double PtMax = 0.2; // gchamber: max pt cut (1e1p spectrum)
 	double Em_ub = 999999999999999999999999;        
 
 	std::cout << "UseAllSectors = " << UseAllSectors << "\n";
-    std::cout << "ApplyFiducials = " << ApplyFiducials << "\n";
+        std::cout << "ApplyFiducials = " << ApplyFiducials << "\n";
 	std::cout << "ApplyAccWeights = " << ApplyAccWeights << "\n";
-    std::cout << "ApplyReso = " << ApplyReso << "\n";
-    std::cout << "TruthLevel study = " << TruthLevel1p0piSignalStudy << "\n";
+        std::cout << "ApplyReso = " << ApplyReso << "\n";
+        std::cout << "TruthLevel study = " << TruthLevel1p0piSignalStudy << "\n";
 
 	// ---------------------------------------------------------------------------------------------------------------
 
@@ -131,6 +131,10 @@ void genie_analysis::Loop() {
 		std::cout << "nentries IS HARD CODED AND LESS THAN THE ACTUAL NUMBER OF EVENTS IN THIS FILE!!!" << std::endl << std::endl;
 	}	
 	if (nentries > fChain->GetEntriesFast()) {
+		std::cout << "nentries is greater than number of actual entries in file." << std::endl;
+		std::cout << "To not cause any weird errors in the loops, the program" << std::endl;
+		std::cout << "reset nentries to be equal to the number of actual" << std::endl;
+		std::cout << "entries in this file." << std::endl;
 		nentries = fChain->GetEntriesFast();
 	}
 
@@ -315,6 +319,7 @@ void genie_analysis::Loop() {
     TH1F *h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[NInt][NSectors];
 	TH1F *h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[NInt][NSectors][2]; // smithja: same as h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE
 												//          separated accordinerg to FSI (in last index 0, resc_val > 1) or no FSI (in 
+	TH1F *h1_InteractionBreakDown_ThetaPQ[NInt]; 
 	TH1F *h1_InteractionBreakDown_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector[NInt][NSectors];
 	TH1F *h1_EePrime_FullyInclusive_NoQ4Weight_Theta_Slice_InSector[NSectors];
 	TH1F *h1_EePrime_FullyInclusive_NoQ4Weight_xBCut_Theta_Slice_InSector[NSectors];
@@ -325,11 +330,7 @@ void genie_analysis::Loop() {
                                                                                                //          separated according to FSI (in last index 0, resc_val > 1) or no 
                                                                                                //          FSI (in last index 1, resc_val = 1)
 
-    TH1F *h1_InteractionBreakDown_InSector_Em[NInt][NSectors]; // Missing energy broken down into sectors and reaction mechanisms
-    TH1F *h1_InteractionBreakDown_InSector_Pm[NInt][NSectors];
-    TH2F *h2_InteractionBreakDown_InSector_EmPm[NInt][NSectors];
-	TH1F *h1_InteractionBreakDown_ThetaPQ[NInt][NSectors]; 
-	TH1F *h1_InteractionBreakDown_InSector_el_mom_Emcut[NInt][NSectors];
+        TH1F *h1_InteractionBreakDown_InSector_Em[NInt][NSectors]; // Missing energy broken down into sectors and reaction mechanisms
 
 	TProfile *TProf_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector[NSectors];
 	TProfile *TProf_Theta_FullyInclusive_NoQ4Weight_Theta_Slice_InSector[NSectors];
@@ -339,54 +340,34 @@ void genie_analysis::Loop() {
 	TH3D* h3_PiPlus_Mom_Theta_Phi = new TH3D("h3_PiPlus_Mom_Theta_Phi",";P_{#pi^{+}} [GeV/c];#theta_{#pi^{+}} [deg];#phi_{#pi^{+}} [deg]",450,0.,4.5,180,0,360,180,0,360);
 	TH3D* h3_PiMinus_Mom_Theta_Phi = new TH3D("h3_PiMinus_Mom_Theta_Phi",";P_{#pi^{-}} [GeV/c];#theta_{#pi^{-}} [deg];#phi_{#pi^{-}} [deg]",450,0.,4.5,180,0,360,180,0,360);
 
+	for (int WhichInt = 0; WhichInt < NInt; WhichInt++) {
+		h1_InteractionBreakDown_ThetaPQ[WhichInt] = new TH1F("h1_Interaction"+TString(std::to_string(WhichInt)), "", 90, 0, 180);
+	}
+
+
 	for (int WhichSector = 0; WhichSector < NSectors; WhichSector++) {
 
-		for (int WhichInt = 0; WhichInt < NInt; WhichInt++) {
-			double proton_upper_bound;
-            double proton_lower_bound;
-            double electron_lower_bound;
-            double electron_upper_bound;
-
-            if(en_beam[fbeam_en]>1. && en_beam[fbeam_en]<2.){
-            	proton_lower_bound = 0.2; proton_upper_bound = 1.0;
-            	electron_lower_bound = 0.1; electron_upper_bound = en_beam[fbeam_en];
-            }
-            if(en_beam[fbeam_en]>2. && en_beam[fbeam_en]<3.){
-            	proton_lower_bound = 0.2; proton_upper_bound = 1.6;
-            	electron_lower_bound = 0.4; electron_upper_bound = en_beam[fbeam_en];
-            	
-            }
-            if(en_beam[fbeam_en]>4. && en_beam[fbeam_en]<5.){
-            	proton_lower_bound = 0.2; proton_upper_bound = 2.0;
-            	electron_lower_bound = 0.6; electron_upper_bound = en_beam[fbeam_en];
-            	
-            }
-
+//		for (int WhichInt = 1; WhichInt < NInt; WhichInt++) { // smithja: when adding code to set Interaction = 0 if fchoice == 0 (for CLAS data)
+								      // I noticed this for loop started at 1. To fill plots for the CLAS data, we need
+								      // this to start at WhichInt = 0 so we have valid histograms for Interaction = 0
+								      // indices.
+                for (int WhichInt = 0; WhichInt < NInt; WhichInt++) {
 			h1_InteractionBreakDown_InSector_Q2[WhichInt][WhichSector] = new TH1F("h1_Interaction"+TString(std::to_string(WhichInt))+"_InSector"+TString(std::to_string(WhichSector))+"_Q2", "", 6000, 0., 6.);
 			h1_InteractionBreakDown_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_"+TString(std::to_string(WhichSector)), "", 6000, 0., 6.);
-			h1_InteractionBreakDown_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__"+TString(std::to_string(WhichSector)), "", 80, electron_lower_bound, electron_upper_bound); // gchamber: electron momentum breakdown for inclusive sample
-            h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom_noptcut__"+TString(std::to_string(WhichSector)), "", 80, electron_lower_bound, electron_upper_bound); // gchamber: electron momentum breakdown for 1e1p sample
-            h1_InteractionBreakdown_Omega_NoQ4Weight_InSector_el_mom_ptcut[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom_ptcut__"+TString(std::to_string(WhichSector)), "", 80, electron_lower_bound, electron_upper_bound); // gchamber: electron momentum breakdown for 1e1p sample with ptcut (if turned on)
-
-            h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom__"+TString(std::to_string(WhichSector)), "", 80, proton_lower_bound, proton_upper_bound); // gchamber: proton momentum breakdown for every proton passing fiducial, other cuts (inclusive)
-            h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom_QE__"+TString(std::to_string(WhichSector)), "", 80, proton_lower_bound, proton_upper_bound); // gchamber: proton momentum breakdown into different channels for 1e1p sample
+			h1_InteractionBreakDown_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__"+TString(std::to_string(WhichSector)), "", 6000, 0., 6.); // gchamber: electron momentum breakdown for inclusive sample
+                        h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom_noptcut__"+TString(std::to_string(WhichSector)), "", 6000, 0., 6.); // gchamber: electron momentum breakdown for 1e1p sample
+                        h1_InteractionBreakdown_Omega_NoQ4Weight_InSector_el_mom_ptcut[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom_ptcut__"+TString(std::to_string(WhichSector)), "", 6000, 0., 6.); // gchamber: electron momentum breakdown for 1e1p sample with ptcut (if turned on)
+                        h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom__"+TString(std::to_string(WhichSector)), "", 6000, 0., 6.); // gchamber: proton momentum breakdown for every proton passing fiducial, other cuts (inclusive)
+                        h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom_QE__"+TString(std::to_string(WhichSector)), "", 6000, 0., 6.); // gchamber: proton momentum breakdown into different channels for 1e1p sample
 			
-			h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[WhichInt][WhichSector][0] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_FSI_prot_mom_QE", "", 80, proton_lower_bound, proton_upper_bound);
-			h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[WhichInt][WhichSector][1] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_noFSI_prot_mom_QE", "", 80, proton_lower_bound, proton_upper_bound);			
-			
+			h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[WhichInt][WhichSector][0] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_FSI_prot_mom_QE", "", 6000, 0., 6.);
+			h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[WhichInt][WhichSector][1] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_noFSI_prot_mom_QE", "", 6000, 0., 6.);			
 			h1_InteractionBreakDown_NoQ4Weight_InSector_el_theta[WhichInt][WhichSector] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_el_theta", "", 720, 0, 180);
 			h1_InteractionBreakDown_NoQ4Weight_InSector_prot_theta[WhichInt][WhichSector] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_prot_theta", "", 720, 0, 180);
-			
-			h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_theta[WhichInt][WhichSector][0] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_FSI_prot_theta", "", 180, 0, 180);
-            h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_theta[WhichInt][WhichSector][1] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_noFSI_prot_theta", "", 180, 0, 180);
+			h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_theta[WhichInt][WhichSector][0] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_FSI_prot_theta", "", 720, 0, 180);
+            h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_theta[WhichInt][WhichSector][1] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_noFSI_prot_theta", "", 720, 0, 180);
             
-            h1_InteractionBreakDown_InSector_Em[WhichInt][WhichSector] = new TH1F("h1_Int_"+TString(std::to_string(WhichInt))+"_Sect_"+TString(std::to_string(WhichSector))+"_Em", "", 10,0,.4);//missing energy distribution
-    		h1_InteractionBreakDown_InSector_Pm[WhichInt][WhichSector] = new TH1F("h1_Int_"+TString(std::to_string(WhichInt))+"_Sect_"+TString(std::to_string(WhichSector))+"_Pm","", 100,0,1.0);
-    		h2_InteractionBreakDown_InSector_EmPm[WhichInt][WhichSector] = new TH2F("h2_Int_"+TString(std::to_string(WhichInt))+"_Sect_"+TString(std::to_string(WhichSector))+"_EmPm","", 10,0.,.4,100,0.,1.0);
-    		h1_InteractionBreakDown_ThetaPQ[WhichInt][WhichSector] = new TH1F("h1_Int"+TString(std::to_string(WhichInt))+"_Sect_"+TString(std::to_string(WhichSector))+"_ThetaPQ", "", 90, 0, 180);
-
-    		h1_InteractionBreakDown_InSector_el_mom_Emcut[WhichInt][WhichSector] = new TH1F("h1_Int"+TString(std::to_string(WhichInt))+"_Sect_"+TString(std::to_string(WhichSector))+"_el_mom_Emcut","", 80, electron_lower_bound, electron_upper_bound);
-
+            h1_InteractionBreakDown_InSector_Em[WhichInt][WhichSector] = new TH1F("h1_Int_"+TString(std::to_string(WhichInt))+"_Sect_"+TString(std::to_string(WhichSector))+"_Em", "", 500,0,1000);//missing energy distribution
 		}
 
 
@@ -445,6 +426,7 @@ void genie_analysis::Loop() {
 	TH2F *h2_N_prot_pi_phot=new TH2F("h2_N_prot_pi_phot","",10,0,5,10,0,5);
 	TH2F *h2_N_prot_pi_phot_nonrad=new TH2F("h2_N_prot_pi_phot_nonrad","",20,0,10,20,0,10);
 	TH2F *h2_el_theta_phi = new TH2F("h2_el_theta_phi","",200,0,360,200,0,180);
+//	TH2F *h2_el_theta_phi = new TH2F("h2_el_theta_phi","",200,0,360,200,10,60);
 	TH1F *h1_el_mom_incl = new TH1F("h1_el_mom_incl","",100,0,2.6);	// gchamber: el momentum inclusive
 	TH2F *h2_el_theta_phi_incl = new TH2F("h1_el_theta_incl","",360,0,360,360,0,360);
 	
@@ -704,13 +686,13 @@ void genie_analysis::Loop() {
 			V3_el.SetXYZ(SmearedPe/pl * pxl,SmearedPe/pl * pyl,SmearedPe/pl * pzl);
 			V4_el.SetPxPyPzE(V3_el.X(),V3_el.Y(),V3_el.Z(),SmearedEe);
 			double phi_ElectronOut = V3_el.Phi(); //in Radians
-			
+
 			V3_el.SetPhi(phi_ElectronOut + TMath::Pi() ); // Vec.Phi() is between (-180,180), GENIE coordinate system flipped with respect to CLAS
-			//Fiducial Cuts with the smeared values // moved it further down after W & Q2 cuts
+
+//			//Fiducial Cuts with the smeared values // moved it further down after W & Q2 cuts
 //			if (ApplyFiducials)  { if (!EFiducialCut(fbeam_en,V3_el) ) continue;} // Electron theta & phi fiducial cuts
 			
 			phi_ElectronOut += TMath::Pi(); // GENIE coordinate system flipped with respect to CLAS
-			
 			el_momentum = V3_el.Mag(); //Momentum after smearing
 			el_theta = V3_el.Theta(); //Angle after smearing
 
@@ -758,14 +740,11 @@ void genie_analysis::Loop() {
 		PassCounter02 ++;	
 		//Definition as for data. It is also correct for GENIE simulation data since V3_el is rotated above by 180 degree in phi
 		double el_phi_mod = V3_el.Phi()*TMath::RadToDeg()  + 30; //Add 30 degree for plotting and photon phi cut
-		//if(el_phi_mod < 0) std::cout << "negative el_phi_mod = " << el_phi_mod << "\n";
 		if(el_phi_mod<0)  el_phi_mod  = el_phi_mod+360; //Add 360 so that electron phi is between 0 and 360 degree
-		//if(el_phi_mod < 30) std::cout << "el_phi_mod = " << el_phi_mod << "\n";
 
 		if (fApplyPhiOpeningAngleEl) { if ( !(TMath::Abs(el_phi_mod - 30)  <= PhiOpeningAngleEl || TMath::Abs(el_phi_mod - 90)  <= PhiOpeningAngleEl || TMath::Abs(el_phi_mod - 150)  <= PhiOpeningAngleEl || TMath::Abs(el_phi_mod - 210)  <= PhiOpeningAngleEl || TMath::Abs(el_phi_mod - 270)  <= PhiOpeningAngleEl || TMath::Abs(el_phi_mod - 330)  <= PhiOpeningAngleEl ) ) { continue; } }
 
 		int ElectronSector = el_phi_mod / 60.;
-
 		PassCounter01 ++;	
 
 		//if (fApplyPhiSliceEl_Sectors126) {if (ElectronSector == 2 || ElectronSector == 3 || ElectronSector == 4) continue;}
@@ -817,7 +796,6 @@ void genie_analysis::Loop() {
 
 		// ---------------------------------------------------------------------------------------------------------------------
 		TVector3 V3_q = (V4_beam-V4_el).Vect();
-		TVector3 V3_rot_q = (V4_beam.Vect() - V3_el);
 		double V3_q_theta_deg = V3_q.Theta() * 180. / TMath::Pi();
 		double V3_q_phi_deg = V3_q.Phi() * 180. / TMath::Pi() + 30.; 
 		if (V3_q_phi_deg > 360) { V3_q_phi_deg = V3_q_phi_deg - 360.; } 
@@ -1419,7 +1397,6 @@ void genie_analysis::Loop() {
 			double p_perp_tot_2p[2]={0};
 			double N_prot_both = 0;
 			double P_N_2p[2]={0};
-
 			rotation->prot2_rot_func( V3_2prot_corr, V3_2prot_uncorr, V4_el, E_tot_2p, p_perp_tot_2p, P_N_2p , &N_prot_both);
 
 			if (num_pi_phot == 0 && N_prot_both != 0){
@@ -1439,10 +1416,8 @@ void genie_analysis::Loop() {
 					double ProtonTheta_Deg = V3_2prot_corr[f].Theta() *180. / TMath::Pi();
 					double ProtonMag = V3_2prot_corr[f].Mag();
 					double ProtonTK = sqrt(ProtonMag*ProtonMag + m_prot*m_prot) - m_prot;
-					double Em = (nu - ProtonTK);
-					TVector3 pmiss_vec =  V3_rot_q - V3_2prot_corr[f];				
-					double pmiss = pmiss_vec.Mag();
-					double ThetaPQ = V3_rot_q.Angle(V3_2prot_corr[f]) * 180. / TMath::Pi();
+					double Em = (nu - ProtonTK)*1000.;
+        				double ThetaPQ = V3_q.Angle(V3_2prot_corr[f]) * 180. / TMath::Pi();
 					//std::cout << "Angle = " << ThetaPQ << "\n";                               
 	 
 					if (Em > Em_ub)  {continue;}
@@ -1477,13 +1452,8 @@ void genie_analysis::Loop() {
 							h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, -P_N_2p[f]*histoweight); // smithja: might have to adjust ProtonSector
 							if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,-P_N_2p[f]*histoweight);
 							if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,-P_N_2p[f]*histoweight);
-
 							h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, -P_N_2p[f]*histoweight);
-							h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, -P_N_2p[f]*histoweight);
-							h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, -P_N_2p[f]*histoweight);
-							h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ,-P_N_2p[f]*histoweight); 
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum,-P_N_2p[f]*histoweight);
-
+							h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,-P_N_2p[f]*histoweight); 
                                                         if (resc_val > 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][0]->Fill( ProtonMag, -P_N_2p[f]*histoweight); }
 							if (resc_val == 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][1]->Fill( ProtonMag, -P_N_2p[f]*histoweight); }
 						}
@@ -1640,10 +1610,8 @@ void genie_analysis::Loop() {
 					double ProtonTheta_Deg = V3_2prot_corr[z].Theta() *180. / TMath::Pi();
 					double ProtonMag = V3_2prot_corr[z].Mag();
 					double ProtonTK = sqrt(ProtonMag*ProtonMag + m_prot*m_prot) - m_prot;
-					double Em = (nu - ProtonTK);
-					TVector3 pmiss_vec =  V3_rot_q - V3_2prot_corr[z];				
-					double pmiss = pmiss_vec.Mag();
-					double ThetaPQ = V3_rot_q.Angle(V3_2prot_corr[z]) * 180. / TMath::Pi();		
+					double Em = (nu - ProtonTK)*1000.;
+					double ThetaPQ = V3_q.Angle(V3_2prot_corr[z]) * 180. / TMath::Pi();		
                                         if (Em > Em_ub)  {continue;}
 					
 					if (fApplyThetaSliceProt) {  // hard coded range for now
@@ -1670,16 +1638,11 @@ void genie_analysis::Loop() {
                                                 if (Interaction > -1) {
 							h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4);
 							h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, P_2p1pito2p0pi[z]*histoweight);
-
+							h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,P_2p1pito2p0pi[z]*histoweight);
 								if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,P_2p1pito2p0pi[z]*histoweight);
-	                            if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,P_2p1pito2p0pi[z]*histoweight);
+	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,P_2p1pito2p0pi[z]*histoweight);
 
 							h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, P_2p1pito2p0pi[z]*histoweight);
-							h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, P_2p1pito2p0pi[z]*histoweight);
-							h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, P_2p1pito2p0pi[z]*histoweight);
-							h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ,P_2p1pito2p0pi[z]*histoweight); 
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum,P_2p1pito2p0pi[z]*histoweight);
-
 							if (resc_val > 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][0]->Fill( ProtonMag, P_2p1pito2p0pi[z]*histoweight); }
                                                         if (resc_val == 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][1]->Fill( ProtonMag, P_2p1pito2p0pi[z]*histoweight); }
 						}
@@ -1770,15 +1733,11 @@ void genie_analysis::Loop() {
                                                 if (Interaction > -1) {
 							h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4);
 							h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, P_2p1pito1p1pi[z]*histoweight);
+							h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,P_2p1pito1p1pi[z]*histoweight);
                             					if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,P_2p1pito1p1pi[z]*histoweight);
 	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,P_2p1pito1p1pi[z]*histoweight);
 
 							h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, P_2p1pito1p1pi[z]*histoweight);
-							h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, P_2p1pito1p1pi[z]*histoweight);
-							h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, P_2p1pito1p1pi[z]*histoweight);
-							h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ,P_2p1pito1p1pi[z]*histoweight); 
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum,P_2p1pito1p1pi[z]*histoweight);
-
                                                         if (resc_val > 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][0]->Fill( ProtonMag, P_2p1pito1p1pi[z]*histoweight); }
                                                         if (resc_val == 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][1]->Fill( ProtonMag, P_2p1pito1p1pi[z]*histoweight); }
 						}
@@ -1861,16 +1820,12 @@ void genie_analysis::Loop() {
 						if (p_perp_tot_2p[z] < PtMax && Interaction > -1) {h1_InteractionBreakdown_Omega_NoQ4Weight_InSector_el_mom_ptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4); } 
                                                 if (Interaction > -1) {
 							h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4);
-							h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, -P_2p1pito1p0pi[z]*histoweight);                      
+							h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, -P_2p1pito1p0pi[z]*histoweight);
+							h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,-P_2p1pito1p0pi[z]*histoweight);                      
 								if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1, -P_2p1pito1p0pi[z]*histoweight);
 	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2, -P_2p1pito1p0pi[z]*histoweight);
 							
 							h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, -P_2p1pito1p0pi[z]*histoweight);
-							h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, -P_2p1pito1p0pi[z]*histoweight);
-							h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, -P_2p1pito1p0pi[z]*histoweight);
-							h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ,-P_2p1pito1p0pi[z]*histoweight);
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum,-P_2p1pito1p0pi[z]*histoweight);
-
                                                         if (resc_val > 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][0]->Fill( ProtonMag, -P_2p1pito1p0pi[z]*histoweight); }
                                                         if (resc_val == 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][1]->Fill( ProtonMag, -P_2p1pito1p0pi[z]*histoweight); }
 						}
@@ -2025,10 +1980,8 @@ void genie_analysis::Loop() {
 					double ProtonTheta_Deg = V3_2prot_corr[z].Theta() *180. / TMath::Pi();
 					double ProtonMag = V3_2prot_corr[z].Mag();
 					double ProtonTK = sqrt(ProtonMag*ProtonMag + m_prot*m_prot) - m_prot;
-					double Em = (nu - ProtonTK);
-					TVector3 pmiss_vec =  V3_rot_q - V3_2prot_corr[z];				
-					double pmiss = pmiss_vec.Mag();
-					double ThetaPQ = V3_rot_q.Angle(V3_2prot_corr[z]) * 180. / TMath::Pi();						
+					double Em = (nu - ProtonTK)*1000.;
+					double ThetaPQ = V3_q.Angle(V3_2prot_corr[z]) * 180. / TMath::Pi();						
                                         if (Em > Em_ub)  {continue;}
 
 					if (fApplyThetaSliceProt) {  // hard coded range for now
@@ -2054,13 +2007,8 @@ void genie_analysis::Loop() {
                                                 if (Interaction > -1) {
 							h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4);
 							h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, Ptot_2p[z]*histoweight);
-
+							h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,Ptot_2p[z]*histoweight);
                             h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, Ptot_2p[z]*histoweight);
-							h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, Ptot_2p[z]*histoweight);
-							h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, Ptot_2p[z]*histoweight);
-							h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ, Ptot_2p[z]*histoweight);
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum,Ptot_2p[z]*histoweight);
-
 								if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,Ptot_2p[z]*histoweight);
 	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,Ptot_2p[z]*histoweight);
 
@@ -2246,10 +2194,8 @@ void genie_analysis::Loop() {
 						double ProtonTheta_Deg = V3_prot_corr[j].Theta() *180. / TMath::Pi();
 						double ProtonMag = V3_prot_corr[j].Mag();
 						double ProtonTK = sqrt(ProtonMag*ProtonMag + m_prot*m_prot) - m_prot;
-						double Em = (nu - ProtonTK);
-						TVector3 pmiss_vec =  V3_rot_q - V3_prot_corr[j];				
-						double pmiss = pmiss_vec.Mag();
-						double ThetaPQ = V3_rot_q.Angle(V3_prot_corr[j]) * 180. / TMath::Pi();
+						double Em = (nu - ProtonTK)*1000.;
+						double ThetaPQ = V3_q.Angle(V3_prot_corr[j]) * 180. / TMath::Pi();	
                                         	if (Em > Em_ub)  {continue;}
 						
 						if (fApplyThetaSliceProt) {  // hard coded range for now
@@ -2275,15 +2221,11 @@ void genie_analysis::Loop() {
                                                 	if (Interaction > -1) {
 								h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4);
 								h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, P_3pto2p[count][j]*histoweight);
+								h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,P_3pto2p[count][j]*histoweight);
 	                            					if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,P_3pto2p[count][j]*histoweight);
 	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,P_3pto2p[count][j]*histoweight);
 
 								h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, P_3pto2p[count][j]*histoweight);
-								h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, P_3pto2p[count][j]*histoweight);
-								h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, P_3pto2p[count][j]*histoweight);
-								h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ, P_3pto2p[count][j]*histoweight);
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum,P_3pto2p[count][j]*histoweight);
-
 	                                                        if (resc_val > 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][0]->Fill( ProtonMag, P_3pto2p[count][j]*histoweight); }
         	                                                if (resc_val == 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][1]->Fill( ProtonMag, P_3pto2p[count][j]*histoweight); }
 							}
@@ -2382,10 +2324,8 @@ void genie_analysis::Loop() {
 					double ProtonTheta_Deg = V3_prot_corr[j].Theta() *180. / TMath::Pi();
 					double ProtonMag = V3_prot_corr[j].Mag();
 					double ProtonTK = sqrt(ProtonMag*ProtonMag + m_prot*m_prot) - m_prot;
-					double Em = (nu - ProtonTK);
-					TVector3 pmiss_vec =  V3_rot_q - V3_prot_corr[j];				
-					double pmiss = pmiss_vec.Mag();
-					double ThetaPQ = V3_rot_q.Angle(V3_prot_corr[j]) * 180. / TMath::Pi();
+					double Em = (nu - ProtonTK)*1000.;
+					double ThetaPQ = V3_q.Angle(V3_prot_corr[j]) * 180. / TMath::Pi();
 
                                         if (Em > Em_ub)  {continue;}
 
@@ -2412,13 +2352,8 @@ void genie_analysis::Loop() {
                                                 if (Interaction > -1) {
 							h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4);
 							h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, -P_3pto1p[j]*histoweight);
-
+							h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,-P_3pto1p[j]*histoweight);
                             h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, -P_3pto1p[j]*histoweight);
-								h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, -P_3pto1p[j]*histoweight);
-								h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, -P_3pto1p[j]*histoweight);
-								h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ, -P_3pto1p[j]*histoweight);
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum,-P_3pto1p[j]*histoweight);
-
                                                 		if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,-P_3pto1p[j]*histoweight);
 	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,-P_3pto1p[j]*histoweight);
 
@@ -2570,10 +2505,8 @@ void genie_analysis::Loop() {
 					double ProtonTheta_Deg = V3_prot_corr[j].Theta() *180. / TMath::Pi();
 					double ProtonMag = V3_prot_corr[j].Mag();
 					double ProtonTK = sqrt(ProtonMag*ProtonMag + m_prot*m_prot) - m_prot;
-					double Em = (nu - ProtonTK);
-					TVector3 pmiss_vec =  V3_rot_q - V3_prot_corr[j];				
-					double pmiss = pmiss_vec.Mag();
-					double ThetaPQ = V3_rot_q.Angle(V3_prot_corr[j]) * 180. / TMath::Pi();				
+					double Em = (nu - ProtonTK)*1000.;
+					double ThetaPQ = V3_q.Angle(V3_prot_corr[j]) * 180. / TMath::Pi();				
 	
                                         if (Em > Em_ub)  {continue;}
 					
@@ -2600,13 +2533,8 @@ void genie_analysis::Loop() {
                                                 if (Interaction > -1) {
 							h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4);
 							h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, P_tot_3p[j]*histoweight);
-
+							h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,P_tot_3p[j]*histoweight);
                             h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, P_tot_3p[j]*histoweight);
-								h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, P_tot_3p[j]*histoweight);
-								h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, P_tot_3p[j]*histoweight);
-								h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ, P_tot_3p[j]*histoweight);
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum,P_tot_3p[j]*histoweight);
-
 								if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,P_tot_3p[j]*histoweight);
 	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,P_tot_3p[j]*histoweight);
 
@@ -3034,6 +2962,7 @@ void genie_analysis::Loop() {
 				h2_pperp_W->Fill(W_var,p_perp_tot,histoweight);
 				h1_theta0->Fill((V4_beam.Vect()).Angle(V4_prot_el_tot.Vect()) *TMath::RadToDeg(),histoweight);
 
+
 				double ProtonPhi_Deg = V3_prot_corr.Phi() *180. / TMath::Pi() + 30;
 				//double ProtonPhi_Deg = V3_prot_corr.Phi() *180. / TMath::Pi() + 180 + 30; // smithja: commented out on 9/22/2021; 180-degree shift not needed here
 				if (ProtonPhi_Deg > 360.) { ProtonPhi_Deg -= 360.; } 
@@ -3042,13 +2971,11 @@ void genie_analysis::Loop() {
 				double ProtonTheta_Deg = V3_prot_corr.Theta() *180. / TMath::Pi();
 				double ProtonMag = V3_prot_corr.Mag();
 				double ProtonTK = sqrt(ProtonMag*ProtonMag + m_prot*m_prot) - m_prot;
+				double Em = (nu - ProtonTK)*1000.;
 				
-				double Em = (nu - ProtonTK);
-				TVector3 pmiss_vec =  V3_rot_q - V3_prot_corr;				
-				double pmiss = pmiss_vec.Mag();
-				double ThetaPQ = V3_rot_q.Angle(V3_prot_corr) * 180. / TMath::Pi();
-                		
-                if (Em > Em_ub)  {continue;}
+                                double ThetaPQ = V3_q.Angle(V3_prot_corr) * 180. / TMath::Pi();
+			
+                                if (Em > Em_ub)  {continue;}
 						
 				if (fApplyThetaSliceProt) {  // hard coded range for now
 					if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
@@ -3073,12 +3000,8 @@ void genie_analysis::Loop() {
 					if (Interaction > -1) {
 						h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4);
 						h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, histoweight);
-
                         h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, histoweight);
-								h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, histoweight);
-								h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, histoweight);
-								h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ, histoweight);
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum,histoweight);
+						h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,histoweight);
 
                                         		if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,histoweight);
 	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,histoweight);
@@ -3255,10 +3178,8 @@ void genie_analysis::Loop() {
 					double ProtonTheta_Deg = V3_prot_corr.Theta() *180. / TMath::Pi();
 					double ProtonMag = V3_prot_corr.Mag();
 					double ProtonTK = sqrt(ProtonMag*ProtonMag + m_prot*m_prot) - m_prot;
-					double Em = (nu - ProtonTK);
-					TVector3 pmiss_vec =  V3_rot_q - V3_prot_corr;				
-					double pmiss = pmiss_vec.Mag();
-					double ThetaPQ = V3_rot_q.Angle(V3_prot_corr) * 180. / TMath::Pi();
+					double Em = (nu - ProtonTK)*1000.;
+					double ThetaPQ = V3_q.Angle(V3_prot_corr) * 180. / TMath::Pi();	
 				
                                         if (Em > Em_ub)  {continue;}
 					
@@ -3285,16 +3206,12 @@ void genie_analysis::Loop() {
                                                 if (Interaction > -1) {
 							h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4);
 							h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, -(N_piphot_undet/N_piphot_det)*histoweight);
+							h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,-(N_piphot_undet/N_piphot_det)*histoweight);
 
 								if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,-(N_piphot_undet/N_piphot_det)*histoweight);
 	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,-(N_piphot_undet/N_piphot_det)*histoweight);
 
 							h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, -(N_piphot_undet/N_piphot_det)*histoweight);
-								h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss,  -(N_piphot_undet/N_piphot_det)*histoweight);
-								h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss,  -(N_piphot_undet/N_piphot_det)*histoweight);
-								h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ,  -(N_piphot_undet/N_piphot_det)*histoweight);
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum, -(N_piphot_undet/N_piphot_det)*histoweight);
-
                                                         if (resc_val > 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][0]->Fill( ProtonMag, -(N_piphot_undet/N_piphot_det)*histoweight); }
                                                         if (resc_val == 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][1]->Fill( ProtonMag, -(N_piphot_undet/N_piphot_det)*histoweight); }
 						}
@@ -3449,10 +3366,8 @@ void genie_analysis::Loop() {
 					double ProtonTheta_Deg = V3_prot_corr.Theta() *180. / TMath::Pi();
 					double ProtonMag = V3_prot_corr.Mag();
 					double ProtonTK = sqrt(ProtonMag*ProtonMag + m_prot*m_prot) - m_prot;
-					double Em = (nu - ProtonTK);
-					TVector3 pmiss_vec =  V3_rot_q - V3_prot_corr;				
-					double pmiss = pmiss_vec.Mag();
-					double ThetaPQ = V3_rot_q.Angle(V3_prot_corr) * 180. / TMath::Pi();                                 
+					double Em = (nu - ProtonTK)*1000.;
+					double ThetaPQ = V3_q.Angle(V3_prot_corr) * 180. / TMath::Pi();                                 
        
 					if (Em > Em_ub)  {continue;}
 				
@@ -3479,13 +3394,8 @@ void genie_analysis::Loop() {
                                                 if (Interaction > -1) {
 							h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4);
 							h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, P_1p1pi[z]*histoweight);
-
+							h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,P_1p1pi[z]*histoweight);
 							h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, P_1p1pi[z]*histoweight);
-								h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, P_1p1pi[z]*histoweight);
-								h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, P_1p1pi[z]*histoweight);
-								h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ, P_1p1pi[z]*histoweight);
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum, P_1p1pi[z]*histoweight);
-
                                                 		if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,P_1p1pi[z]*histoweight);
 	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,P_1p1pi[z]*histoweight);
 
@@ -3581,10 +3491,8 @@ void genie_analysis::Loop() {
 				double ProtonTheta_Deg = V3_prot_corr.Theta() *180. / TMath::Pi();
 				double ProtonMag = V3_prot_corr.Mag();
 				double ProtonTK = sqrt(ProtonMag*ProtonMag + m_prot*m_prot) - m_prot;
-				double Em = (nu - ProtonTK);
-				TVector3 pmiss_vec =  V3_rot_q - V3_prot_corr;				
-				double pmiss = pmiss_vec.Mag();
-				double ThetaPQ = V3_rot_q.Angle(V3_prot_corr) * 180. / TMath::Pi();
+				double Em = (nu - ProtonTK)*1000.;
+				double ThetaPQ = V3_q.Angle(V3_prot_corr) * 180. / TMath::Pi();
 	
                                 if (Em > Em_ub)  {continue;}
 				
@@ -3613,13 +3521,8 @@ void genie_analysis::Loop() {
 						h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, -P_1p0pi*histoweight);
                        					if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,-P_1p0pi*histoweight);
 	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,-P_1p0pi*histoweight);
-
+						h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,-P_1p0pi*histoweight);
 						h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, -P_1p0pi*histoweight);
-								h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, -P_1p0pi*histoweight);
-								h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, -P_1p0pi*histoweight);
-								h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ, -P_1p0pi*histoweight);
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum, -P_1p0pi*histoweight);
-
                                                 if (resc_val > 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][0]->Fill( ProtonMag, -P_1p0pi*histoweight); }
                                                 if (resc_val == 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][1]->Fill( ProtonMag, -P_1p0pi*histoweight); }
 					}
@@ -3770,10 +3673,8 @@ void genie_analysis::Loop() {
 				double ProtonTheta_Deg = V3_prot_corr.Theta() *180. / TMath::Pi();
 				double ProtonMag = V3_prot_corr.Mag();
 				double ProtonTK = sqrt(ProtonMag*ProtonMag + m_prot*m_prot) - m_prot;
-				double Em = (nu - ProtonTK);
-				TVector3 pmiss_vec =  V3_rot_q - V3_prot_corr;				
-				double pmiss = pmiss_vec.Mag();
-				double ThetaPQ = V3_rot_q.Angle(V3_prot_corr) * 180. / TMath::Pi();
+				double Em = (nu - ProtonTK)*1000.;
+				double ThetaPQ = V3_q.Angle(V3_prot_corr) * 180. / TMath::Pi();
 					
                                 if (Em > Em_ub)  {continue;}
 				
@@ -3799,15 +3700,10 @@ void genie_analysis::Loop() {
                                         if (Interaction > -1) {
 						h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl/Q4);
 						h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[Interaction][ProtonSector]->Fill( ProtonMag, P_1p3pi*histoweight);
-
                         h1_InteractionBreakDown_InSector_Em[Interaction][ProtonSector]->Fill(Em, P_1p3pi*histoweight);
-								h1_InteractionBreakDown_InSector_Pm[Interaction][ProtonSector]->Fill(pmiss, P_1p3pi*histoweight);
-								h2_InteractionBreakDown_InSector_EmPm[Interaction][ProtonSector]->Fill(Em,pmiss, P_1p3pi*histoweight);
-								h1_InteractionBreakDown_ThetaPQ[Interaction][ProtonSector]->Fill(ThetaPQ, P_1p3pi*histoweight);
-							h1_InteractionBreakDown_InSector_el_mom_Emcut[Interaction][ProtonSector]->Fill(el_momentum, P_1p3pi*histoweight);
-
                                         		if(hitnuc == 2212) h1_hit_nuc_pass->Fill(1,P_1p3pi*histoweight);
 	                                                        if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,P_1p3pi*histoweight);
+						h1_InteractionBreakDown_ThetaPQ[Interaction]->Fill(ThetaPQ,P_1p3pi*histoweight);
 					        if (resc_val > 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][0]->Fill( ProtonMag, P_1p3pi*histoweight); }
                                                 if (resc_val == 1) { h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[Interaction][ProtonSector][1]->Fill( ProtonMag, P_1p3pi*histoweight); }
 					}

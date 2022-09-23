@@ -13,12 +13,15 @@
 #include <map>
 #include <string>
 
-        double get_Neutron_corr(TString file, bool incl);
-        double get_MEC_corr(TString file, bool electrons);
-        TH1D* SumElecSectorsAndInts(TString file, bool isData);
-        TH1D* SumProtSectorsAndInts(TString file, bool isData);
-        TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* G_true, TH1D* G_truereco, TH1D* susa_truereco_rad, bool make_plots = false);
-        double get_ratio_error(double num, double denom, double num_err, double denom_err);
+	 double get_Neutron_corr(TString file, bool incl);
+        double get_MEC_corr(TString file, int sectors, bool electrons);
+        TH1D* SumElecSectorsAndInts(TString file, int sectors, bool isData);
+        TH1D* SumProtSectorsAndInts(TString file, int sectors, bool isData);
+        TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* G_true, TH1D* G_truereco, TH1D* susa_truereco_rad, bool make_plots, std::string type);
+        double get_ratio_error(double num, double denom);
+        void printit(std::string s, double x);
+        double diff_squared(double x, double y);
+        double myratio(double x, double y);
 
         // Get Data Files
         // Format is [Ranges][Excl/Incl]

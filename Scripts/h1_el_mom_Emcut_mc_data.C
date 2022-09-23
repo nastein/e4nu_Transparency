@@ -31,7 +31,7 @@
 
 #include "parse_file.C"
 
-void h1_el_mom_mc_data( int range){
+void h1_el_mom_Emcut_mc_data( int range){
     
     // declare variables that will be used in the plotting/formatting of histograms and file names
     std::string info1 ("");
@@ -83,7 +83,7 @@ void h1_el_mom_mc_data( int range){
 
     for(int i = 0; i < 6; i++) {
         for(int j = 0; j <= 4; j++) {
-            h1_el_momentum_mc[i][j] = (TH1F*)input1->Get(TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", j+1, i));
+            h1_el_momentum_mc[i][j] = (TH1F*)input1->Get(TString::Format("h1_Int%i_Sect_%i_el_mom_Emcut", j+1, i));
             if (i==0 && j==0) continue;
 	    else{
                 h1_el_momentum_mc[0][0]->Add(h1_el_momentum_mc[i][j]);
@@ -91,12 +91,12 @@ void h1_el_mom_mc_data( int range){
         }
     }
     
-    h1_el_momentum_data[0] = (TH1F*)input2->Get(TString::Format("h1_0_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__5"));
-    h1_el_momentum_data[1] = (TH1F*)input2->Get(TString::Format("h1_0_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__4"));
-    h1_el_momentum_data[2] = (TH1F*)input2->Get(TString::Format("h1_0_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__3"));
-    h1_el_momentum_data[3] = (TH1F*)input2->Get(TString::Format("h1_0_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__2"));
-    h1_el_momentum_data[4] = (TH1F*)input2->Get(TString::Format("h1_0_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__1"));
-    h1_el_momentum_data[5] = (TH1F*)input2->Get(TString::Format("h1_0_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__0"));
+    h1_el_momentum_data[0] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_0_el_mom_Emcut"));
+    h1_el_momentum_data[1] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_1_el_mom_Emcut"));
+    h1_el_momentum_data[2] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_2_el_mom_Emcut"));
+    h1_el_momentum_data[3] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_3_el_mom_Emcut"));
+    h1_el_momentum_data[4] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_4_el_mom_Emcut"));
+    h1_el_momentum_data[5] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_5_el_mom_Emcut"));
 
     // compile all the sectors into one histogram
     for( int i = 1; i < 6; i++) { 

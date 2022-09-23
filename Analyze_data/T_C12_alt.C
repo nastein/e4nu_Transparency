@@ -13,7 +13,7 @@ double weighted_average(TH1D* h1) {
         return num_sum/den_sum;
 }
 
-void T_C12(bool make_plots = false) {
+void T_C12_alt(bool make_plots = false) {
         gStyle->SetOptStat(0);
 
         data_1161[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample/C12/Excl_Range2_Data__C12_1.161000.root";
@@ -709,11 +709,6 @@ void T_C12(bool make_plots = false) {
         
 	c->BuildLegend();
         c->SaveAs("T_C12.pdf");
-
-        TFile *final = TFile::Open("T_C12.root", "RECREATE");
-        data_t->Write("data");
-        SuSA_t->Write("SuSA");
-        final->Close();
 }
 
 double get_Neutron_corr(TString file, bool incl) {
@@ -842,6 +837,17 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
         TH1D* susa_correction = (TH1D*)susa_true->Clone();
         TH1D* G_correction = (TH1D*)G_true->Clone();
 
+        double susa_factor = susa_true->Integral(1,susa_true->GetNbinsX(), "width");
+        susa_factor = susa_factor/susa_truereco->Integral(1,susa_truereco->GetNbinsX(),"width");
+        std::cout << "susa factor = " << susa_factor << "\n";
+
+        double G_factor = G_true->Integral(1,G_true->GetNbinsX(), "width");
+        G_factor = G_factor/G_truereco->Integral(1,G_truereco->GetNbinsX(), "width");
+        std::cout << "G factor = " << G_factor << "\n";
+
+        double avg_factor = (susa_factor + G_factor)/2.;
+        std::cout << "avg_factor = " << avg_factor << "\n";
+
         susa_correction->Divide(susa_truereco);
         G_correction->Divide(G_truereco);
 
@@ -907,13 +913,15 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
                 if(RadCorr <= 0.) RadCorr = 1.;
 		if(AccCorr <= 0.) AccCorr = 1.;
                 if(!data) RadCorr = 1.;
-                //AccCorr = 1.;
+                AccCorr = avg_factor;
 		NewBinContent = hist->GetBinContent(WhichBin + 1) * AccCorr * RadCorr;
                 NewBinError = hist->GetBinError(WhichBin + 1) * AccCorr * RadCorr;
 
                 OverallClone->SetBinContent(WhichBin + 1, NewBinContent);
                 OverallClone->SetBinError(WhichBin + 1, NewBinError);
         }
+
+
 
 	if(make_plots) {
 	  TString CanvasName = TString::Format("AccCorrCanvas_%s",hist->GetTitle());
@@ -940,6 +948,8 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
 
         int NBinsSpread = Spread->GetXaxis()->GetNbins();
 
+        double error = std::abs(susa_factor - G_factor)/12.;
+
         for (int WhichBin = 0; WhichBin < NBinsSpread; WhichBin++) {
 
                 double BinContent = Spread->GetBinContent(WhichBin+1);
@@ -952,7 +962,8 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
                 double SpreadBinContent = Spread->GetBinContent(WhichBin+1);
                 double XSecBinError = OverallClone->GetBinError(WhichBin+1);
                 double XSecBinEntry = OverallClone->GetBinContent(WhichBin+1);
-                double AccCorrError = SpreadBinContent * XSecBinEntry;
+                double AccCorrError = error*XSecBinEntry;
+
                 double NewXSecBinError = TMath::Sqrt( TMath::Power(XSecBinError,2.) + TMath::Power(AccCorrError,2.) );
                 if(NewXSecBinError < XSecBinError) {
                         std::cout << "Something wrong, errors should increase!" << "\n";
@@ -962,6 +973,7 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
                 OverallClone->SetBinError(WhichBin+1,NewXSecBinError);
 
         }
+
 
         return OverallClone;
 }
