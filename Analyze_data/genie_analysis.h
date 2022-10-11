@@ -501,14 +501,9 @@ genie_analysis::genie_analysis(std::string a_filename, std::string a_target, std
 	}
 
       if (fchoice == 1) { 
-		//Spectral function from Noemi
-		//chain->Add("/pnfs/genie/scratch/users/nsteinbe/eGENIE_grid/SF_2261_all.root");
 
       		// Non radiative SuSav2
-	
-		//chain->Add(Form("/genie/app/users/gchamber/e4nu_2022/e4nu/Simulations/output/C12_2261/C12_2261_EMQE_G18_02a_00_000_noFSI_bigstat.root")); 
 		chain->Add(Form("/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/%s_%sGeV/apapadop_SuSav2_%s_%sGeV_master.root", ftarget.c_str(),fbeam_en.c_str(),ftarget.c_str(),fbeam_en.c_str()));
-		//chain->Add(Form("/pnfs/genie/persistent/users/gchamber/Grid/helium4_2261.gst.root", ftarget.c_str(),fbeam_en.c_str(),ftarget.c_str(),fbeam_en.c_str()));
 		
       		// Ext Radiation SuSav2
 //		  chain->Add(Form("/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/%s_%sGeV/apapadop_Rad_SuSav2_%s_%sGeV.root", ftarget.c_str(),fbeam_en.c_str(),ftarget.c_str(),fbeam_en.c_str()));  

@@ -348,34 +348,34 @@ void genie_analysis::Loop() {
             double electron_upper_bound;
 
             if(en_beam[fbeam_en]>1. && en_beam[fbeam_en]<2.){
-            	proton_lower_bound = 0.; proton_upper_bound = 6.;
-            	electron_lower_bound = 0.; electron_upper_bound = 6.;
+            	proton_lower_bound = 0.2; proton_upper_bound = 1.0;
+            	electron_lower_bound = 0.1; electron_upper_bound = en_beam[fbeam_en];
             }
             if(en_beam[fbeam_en]>2. && en_beam[fbeam_en]<3.){
-            	proton_lower_bound = 0.; proton_upper_bound = 6.;
-            	electron_lower_bound = 0.; electron_upper_bound = 6.;
+            	proton_lower_bound = 0.2; proton_upper_bound = 1.6;
+            	electron_lower_bound = 0.4; electron_upper_bound = en_beam[fbeam_en];
             	
             }
             if(en_beam[fbeam_en]>4. && en_beam[fbeam_en]<5.){
-            	proton_lower_bound = 0.; proton_upper_bound = 6.;
-            	electron_lower_bound = 0.; electron_upper_bound = 6.;
+            	proton_lower_bound = 0.2; proton_upper_bound = 2.0;
+            	electron_lower_bound = 0.6; electron_upper_bound = en_beam[fbeam_en];
             	
             }
 
 			h1_InteractionBreakDown_InSector_Q2[WhichInt][WhichSector] = new TH1F("h1_Interaction"+TString(std::to_string(WhichInt))+"_InSector"+TString(std::to_string(WhichSector))+"_Q2", "", 6000, 0., 6.);
 			h1_InteractionBreakDown_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_"+TString(std::to_string(WhichSector)), "", 6000, 0., 6.);
-			h1_InteractionBreakDown_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__"+TString(std::to_string(WhichSector)), "", 6000, electron_lower_bound, electron_upper_bound); // gchamber: electron momentum breakdown for inclusive sample
-            h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom_noptcut__"+TString(std::to_string(WhichSector)), "", 6000, electron_lower_bound, electron_upper_bound); // gchamber: electron momentum breakdown for 1e1p sample
-            h1_InteractionBreakdown_Omega_NoQ4Weight_InSector_el_mom_ptcut[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom_ptcut__"+TString(std::to_string(WhichSector)), "", 6000, electron_lower_bound, electron_upper_bound); // gchamber: electron momentum breakdown for 1e1p sample with ptcut (if turned on)
+			h1_InteractionBreakDown_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__"+TString(std::to_string(WhichSector)), "", 80, electron_lower_bound, electron_upper_bound); // gchamber: electron momentum breakdown for inclusive sample
+            h1_InteractionBreakDown_Omega_NoQ4Weight_InSector_el_mom_noptcut[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom_noptcut__"+TString(std::to_string(WhichSector)), "", 80, electron_lower_bound, electron_upper_bound); // gchamber: electron momentum breakdown for 1e1p sample
+            h1_InteractionBreakdown_Omega_NoQ4Weight_InSector_el_mom_ptcut[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom_ptcut__"+TString(std::to_string(WhichSector)), "", 80, electron_lower_bound, electron_upper_bound); // gchamber: electron momentum breakdown for 1e1p sample with ptcut (if turned on)
 
-            h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom__"+TString(std::to_string(WhichSector)), "", 6000, proton_lower_bound, proton_upper_bound); // gchamber: proton momentum breakdown for every proton passing fiducial, other cuts (inclusive)
-            h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom_QE__"+TString(std::to_string(WhichSector)), "", 6000, proton_lower_bound, proton_upper_bound); // gchamber: proton momentum breakdown into different channels for 1e1p sample
+            h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom__"+TString(std::to_string(WhichSector)), "", 80, proton_lower_bound, proton_upper_bound); // gchamber: proton momentum breakdown for every proton passing fiducial, other cuts (inclusive)
+            h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom_QE[WhichInt][WhichSector]  = new TH1F("h1_"+TString(std::to_string(WhichInt))+"_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom_QE__"+TString(std::to_string(WhichSector)), "", 80, proton_lower_bound, proton_upper_bound); // gchamber: proton momentum breakdown into different channels for 1e1p sample
 			
-			h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[WhichInt][WhichSector][0] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_FSI_prot_mom_QE", "", 6000, proton_lower_bound, proton_upper_bound);
-			h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[WhichInt][WhichSector][1] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_noFSI_prot_mom_QE", "", 6000, proton_lower_bound, proton_upper_bound);			
+			h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[WhichInt][WhichSector][0] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_FSI_prot_mom_QE", "", 80, proton_lower_bound, proton_upper_bound);
+			h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_mom_QE[WhichInt][WhichSector][1] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_noFSI_prot_mom_QE", "", 80, proton_lower_bound, proton_upper_bound);			
 			
-			h1_InteractionBreakDown_NoQ4Weight_InSector_el_theta[WhichInt][WhichSector] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_el_theta", "", 180, 0, 180);
-			h1_InteractionBreakDown_NoQ4Weight_InSector_prot_theta[WhichInt][WhichSector] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_prot_theta", "", 180, 0, 180);
+			h1_InteractionBreakDown_NoQ4Weight_InSector_el_theta[WhichInt][WhichSector] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_el_theta", "", 720, 0, 180);
+			h1_InteractionBreakDown_NoQ4Weight_InSector_prot_theta[WhichInt][WhichSector] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_prot_theta", "", 720, 0, 180);
 			
 			h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_theta[WhichInt][WhichSector][0] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_FSI_prot_theta", "", 180, 0, 180);
             h1_InteractionBreakDown_NoQ4Weight_InSector_isFSI_prot_theta[WhichInt][WhichSector][1] = new TH1F("h1_InteractionEq"+TString(std::to_string(WhichInt))+"_NoQ4Weight_InSector"+TString(std::to_string(WhichSector))+"_noFSI_prot_theta", "", 180, 0, 180);
@@ -1460,11 +1460,11 @@ void genie_analysis::Loop() {
                                         	}  
                                 	}
 
-                    if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { 
+                                	if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { 
 						same_sector_bool = false;
 						continue; 
 					} 
-                    if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
+                                	if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
 
 
 					h2_el_CosTheta_E->Fill(V3_el.CosTheta(),V4_el.E(),-P_N_2p[f]*histoweight);

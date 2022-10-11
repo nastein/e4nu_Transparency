@@ -30,7 +30,7 @@
 #include <stdio.h>
 
 #include "parse_file.C"
-
+#include "../Analyze_data/myFunctions.cpp"
 void h1_el_mom_Emcut_mc_data( int range){
     
     // declare variables that will be used in the plotting/formatting of histograms and file names
@@ -78,12 +78,12 @@ void h1_el_mom_Emcut_mc_data( int range){
     std::string run_type2 = std::string(((TNamed*)Run_Info2->FindObject("Run type"))->GetTitle());
 
     // histogram initialization
-    TH1F* h1_el_momentum_mc[6][4];
-    TH1F* h1_el_momentum_data[6];
+    TH1D* h1_el_momentum_mc[6][4];
+    TH1D* h1_el_momentum_data[6];
 
     for(int i = 0; i < 6; i++) {
         for(int j = 0; j <= 4; j++) {
-            h1_el_momentum_mc[i][j] = (TH1F*)input1->Get(TString::Format("h1_Int%i_Sect_%i_el_mom_Emcut", j+1, i));
+            h1_el_momentum_mc[i][j] = (TH1D*)input1->Get(TString::Format("h1_Int%i_Sect_%i_el_mom_Emcut", j+1, i));
             if (i==0 && j==0) continue;
 	    else{
                 h1_el_momentum_mc[0][0]->Add(h1_el_momentum_mc[i][j]);
@@ -91,12 +91,12 @@ void h1_el_mom_Emcut_mc_data( int range){
         }
     }
     
-    h1_el_momentum_data[0] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_0_el_mom_Emcut"));
-    h1_el_momentum_data[1] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_1_el_mom_Emcut"));
-    h1_el_momentum_data[2] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_2_el_mom_Emcut"));
-    h1_el_momentum_data[3] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_3_el_mom_Emcut"));
-    h1_el_momentum_data[4] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_4_el_mom_Emcut"));
-    h1_el_momentum_data[5] = (TH1F*)input2->Get(TString::Format("h1_Int0_Sect_5_el_mom_Emcut"));
+    h1_el_momentum_data[0] = (TH1D*)input2->Get(TString::Format("h1_Int0_Sect_0_el_mom_Emcut"));
+    h1_el_momentum_data[1] = (TH1D*)input2->Get(TString::Format("h1_Int0_Sect_1_el_mom_Emcut"));
+    h1_el_momentum_data[2] = (TH1D*)input2->Get(TString::Format("h1_Int0_Sect_2_el_mom_Emcut"));
+    h1_el_momentum_data[3] = (TH1D*)input2->Get(TString::Format("h1_Int0_Sect_3_el_mom_Emcut"));
+    h1_el_momentum_data[4] = (TH1D*)input2->Get(TString::Format("h1_Int0_Sect_4_el_mom_Emcut"));
+    h1_el_momentum_data[5] = (TH1D*)input2->Get(TString::Format("h1_Int0_Sect_5_el_mom_Emcut"));
 
     // compile all the sectors into one histogram
     for( int i = 1; i < 6; i++) { 
@@ -113,8 +113,12 @@ void h1_el_mom_Emcut_mc_data( int range){
     h1_el_momentum_mc[0][0]->Sumw2();
     //h1_el_momentum_mc[0][0]->Rebin( 25);
  
-    std::cout << "Normalizing factor = "<< h1_el_momentum_data[5]->Integral()/h1_el_momentum_mc[0][0]->Integral() << "\n";
-    h1_el_momentum_mc[0][0]->Scale( h1_el_momentum_data[5]->Integral()/h1_el_momentum_mc[0][0]->Integral()); 
+    //std::cout << "Normalizing factor = "<< h1_el_momentum_data[5]->Integral()/h1_el_momentum_mc[0][0]->Integral() << "\n";
+    //h1_el_momentum_mc[0][0]->Scale( h1_el_momentum_data[5]->Integral()/h1_el_momentum_mc[0][0]->Integral()); 
+    
+    UniversalE4vFunction(h1_el_momentum_mc[0][0],  FSIModelsToLabels["SuSav2_NoRadCorr_LFGM_Truth_WithFidAcc"], "12C", "2_261", TString::Format("susa2_4461_mom_truereco_rad"));
+    UniversalE4vFunction(h1_el_momentum_data[5],  "Pinned Data", "12C", "2_261", TString::Format("data2_4461_mom_truereco_rad"));
+    
     h1_el_momentum_mc[0][0]->SetStats( 0); 
     h1_el_momentum_mc[0][0]->GetXaxis()->SetTitle("Electron Momentum [GeV/c]");
     h1_el_momentum_mc[0][0]->GetYaxis()->SetTitle("Events");

@@ -13,13 +13,6 @@
 #include <map>
 #include <string>
 
-        double get_Neutron_corr(TString file, bool incl);
-        double get_MEC_corr(TString file, bool electrons);
-        TH1D* SumElecSectorsAndInts(TString file, bool isData);
-        TH1D* SumProtSectorsAndInts(TString file, bool isData);
-        TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* G_true, TH1D* G_truereco, TH1D* susa_truereco_rad);
-        double get_ratio_error(double num, double denom, double num_err, double denom_err);
-
         // Get Data Files
         // Format is [Ranges][Excl/Incl]
         // Excl == 0, Incl == 1
@@ -63,7 +56,7 @@
         std::string susa_2261_truereco_rad[3][2];
         std::string susa_4461_truereco_rad[1][2];
 
-        
+
 
 
 #endif

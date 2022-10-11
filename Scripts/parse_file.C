@@ -92,6 +92,7 @@ std::vector<std::string> parse_file(TList *Run_Info) {
     // Add all of the cuts together
     if ( cut_case.compare("noCuts") == 0) cuts = cut_case;
     else cuts = elSectors + deltaPhiEl + thetaEl + elMom + protSectors + deltaPhiProt + thetaProt + protMom;
+    cuts = thetaEl; 
 
     std::cout << "Cuts = " << cuts << std::endl;
     out.push_back(cuts);

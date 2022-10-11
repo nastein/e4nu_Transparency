@@ -1,95 +1,82 @@
 #include "myFunctions.cpp"
-#include "noah_constants_Fe56.h"
+#include "T_Fe56_sectors.h"
+#include "transfunctions.h"
 
-
-double weighted_average(TH1D* h1) {
-        double num_sum = 0.0;
-        double den_sum = 0.0;
-        for (int i = 0; i < h1->GetNbinsX(); i++) {
-                if (h1->GetBinContent(i) == 0) continue;
-                num_sum += h1->GetBinCenter(i)*h1->GetBinContent(i);
-                den_sum += h1->GetBinContent(i);
-        }
-
-        if(isnan(num_sum/den_sum)) return 0.;
-        //std::cout << "Weighted average = " << num_sum/den_sum << "\n";
-        return num_sum/den_sum;
-}
 
 void T_Fe56_sectors(bool make_plots = false) {
         gStyle->SetOptStat(0);
 
-        data_2261[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample/Fe56/Excl_Range1_Data__56Fe_2.261000.root";
-        data_2261[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample/Fe56/Incl_Range1_Data__56Fe_2.261000.root";
-        data_2261[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample/Fe56/Excl_Range2_Data__56Fe_2.261000.root";
-        data_2261[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample/Fe56/Incl_Range2_Data__56Fe_2.261000.root";
-        data_2261[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample/Fe56/Excl_Range3_Data__56Fe_2.261000.root";
-        data_2261[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample/Fe56/Incl_Range3_Data__56Fe_2.261000.root";
-        data_4461[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample/Fe56/Excl_Range1_Data__56Fe_4.461000.root";
-        data_4461[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample/Fe56/Incl_Range1_Data__56Fe_4.461000.root";
+        data_2261[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample3/Fe56/Excl_Range1_Data__56Fe_2.261000.root";
+        data_2261[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample3/Fe56/Incl_Range1_Data__56Fe_2.261000.root";
+        data_2261[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample3/Fe56/Excl_Range2_Data__56Fe_2.261000.root";
+        data_2261[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample3/Fe56/Incl_Range2_Data__56Fe_2.261000.root";
+        data_2261[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample3/Fe56/Excl_Range3_Data__56Fe_2.261000.root";
+        data_2261[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample3/Fe56/Incl_Range3_Data__56Fe_2.261000.root";
+        data_4461[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample3/Fe56/Excl_Range1_Data__56Fe_4.461000.root";
+        data_4461[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample3/Fe56/Incl_Range1_Data__56Fe_4.461000.root";
 
-        susa_2261[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/SuSAv2/Excl_Range1_Genie_1_56Fe_2.261000.root";
-        susa_2261[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/SuSAv2/Incl_Range1_Genie_1_56Fe_2.261000.root";
-        susa_2261[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/SuSAv2/Excl_Range2_Genie_1_56Fe_2.261000.root";
-        susa_2261[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/SuSAv2/Incl_Range2_Genie_1_56Fe_2.261000.root";
-        susa_2261[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/SuSAv2/Excl_Range3_Genie_1_56Fe_2.261000.root";
-        susa_2261[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/SuSAv2/Incl_Range3_Genie_1_56Fe_2.261000.root";
-        susa_4461[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/SuSAv2/Excl_Range1_Genie_1_56Fe_4.461000.root";
-        susa_4461[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/SuSAv2/Incl_Range1_Genie_1_56Fe_4.461000.root";
+        susa_2261[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/SuSAv2/Excl_Range1_Genie_1_56Fe_2.261000.root";
+        susa_2261[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/SuSAv2/Incl_Range1_Genie_1_56Fe_2.261000.root";
+        susa_2261[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/SuSAv2/Excl_Range2_Genie_1_56Fe_2.261000.root";
+        susa_2261[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/SuSAv2/Incl_Range2_Genie_1_56Fe_2.261000.root";
+        susa_2261[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/SuSAv2/Excl_Range3_Genie_1_56Fe_2.261000.root";
+        susa_2261[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/SuSAv2/Incl_Range3_Genie_1_56Fe_2.261000.root";
+        susa_4461[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/SuSAv2/Excl_Range1_Genie_1_56Fe_4.461000.root";
+        susa_4461[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/SuSAv2/Incl_Range1_Genie_1_56Fe_4.461000.root";
 
-        g_2261[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/G18/Excl_Range1_Genie_2_56Fe_2.261000.root";
-        g_2261[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/G18/Incl_Range1_Genie_2_56Fe_2.261000.root";
-        g_2261[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/G18/Excl_Range2_Genie_2_56Fe_2.261000.root";
-        g_2261[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/G18/Incl_Range2_Genie_2_56Fe_2.261000.root";
-        g_2261[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/G18/Excl_Range3_Genie_2_56Fe_2.261000.root";
-        g_2261[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/G18/Incl_Range3_Genie_2_56Fe_2.261000.root";
-        g_4461[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/G18/Excl_Range1_Genie_2_56Fe_4.461000.root";
-        g_4461[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Corr_Sectors/G18/Incl_Range1_Genie_2_56Fe_4.461000.root";
+        g_2261[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/G18/Excl_Range1_Genie_2_56Fe_2.261000.root";
+        g_2261[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/G18/Incl_Range1_Genie_2_56Fe_2.261000.root";
+        g_2261[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/G18/Excl_Range2_Genie_2_56Fe_2.261000.root";
+        g_2261[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/G18/Incl_Range2_Genie_2_56Fe_2.261000.root";
+        g_2261[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/G18/Excl_Range3_Genie_2_56Fe_2.261000.root";
+        g_2261[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/G18/Incl_Range3_Genie_2_56Fe_2.261000.root";
+        g_4461[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/G18/Excl_Range1_Genie_2_56Fe_4.461000.root";
+        g_4461[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/G18/Incl_Range1_Genie_2_56Fe_4.461000.root";
 
-        susa_2261_truereco[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/SuSA/Excl_Range1_Genie_1_56Fe_2.261000.root";
-        susa_2261_truereco[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/SuSA/Incl_Range1_Genie_1_56Fe_2.261000.root";
-        susa_2261_truereco[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/SuSA/Excl_Range2_Genie_1_56Fe_2.261000.root";
-        susa_2261_truereco[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/SuSA/Incl_Range2_Genie_1_56Fe_2.261000.root";
-        susa_2261_truereco[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/SuSA/Excl_Range3_Genie_1_56Fe_2.261000.root";
-        susa_2261_truereco[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/SuSA/Incl_Range3_Genie_1_56Fe_2.261000.root";
-        susa_4461_truereco[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/SuSA/Excl_Range1_Genie_1_56Fe_4.461000.root";
-        susa_4461_truereco[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/SuSA/Incl_Range1_Genie_1_56Fe_4.461000.root";
+        susa_2261_truereco[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/SuSA/Excl_Range1_Genie_1_56Fe_2.261000.root";
+        susa_2261_truereco[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/SuSA/Incl_Range1_Genie_1_56Fe_2.261000.root";
+        susa_2261_truereco[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/SuSA/Excl_Range2_Genie_1_56Fe_2.261000.root";
+        susa_2261_truereco[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/SuSA/Incl_Range2_Genie_1_56Fe_2.261000.root";
+        susa_2261_truereco[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/SuSA/Excl_Range3_Genie_1_56Fe_2.261000.root";
+        susa_2261_truereco[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/SuSA/Incl_Range3_Genie_1_56Fe_2.261000.root";
+        susa_4461_truereco[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/SuSA/Excl_Range1_Genie_1_56Fe_4.461000.root";
+        susa_4461_truereco[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/SuSA/Incl_Range1_Genie_1_56Fe_4.461000.root";
 
-        susa_2261_true[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/SuSA/Excl_Range1_Genie_1_56Fe_2.261000.root";
-        susa_2261_true[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/SuSA/Incl_Range1_Genie_1_56Fe_2.261000.root";
-        susa_2261_true[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/SuSA/Excl_Range2_Genie_1_56Fe_2.261000.root";
-        susa_2261_true[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/SuSA/Incl_Range2_Genie_1_56Fe_2.261000.root";
-        susa_2261_true[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/SuSA/Excl_Range3_Genie_1_56Fe_2.261000.root";
-        susa_2261_true[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/SuSA/Incl_Range3_Genie_1_56Fe_2.261000.root";
-        susa_4461_true[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/SuSA/Excl_Range1_Genie_1_56Fe_4.461000.root";
-        susa_4461_true[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/SuSA/Incl_Range1_Genie_1_56Fe_4.461000.root";
+        susa_2261_true[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/SuSA/Excl_Range1_Genie_1_56Fe_2.261000.root";
+        susa_2261_true[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/SuSA/Incl_Range1_Genie_1_56Fe_2.261000.root";
+        susa_2261_true[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/SuSA/Excl_Range2_Genie_1_56Fe_2.261000.root";
+        susa_2261_true[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/SuSA/Incl_Range2_Genie_1_56Fe_2.261000.root";
+        susa_2261_true[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/SuSA/Excl_Range3_Genie_1_56Fe_2.261000.root";
+        susa_2261_true[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/SuSA/Incl_Range3_Genie_1_56Fe_2.261000.root";
+        susa_4461_true[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/SuSA/Excl_Range1_Genie_1_56Fe_4.461000.root";
+        susa_4461_true[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/SuSA/Incl_Range1_Genie_1_56Fe_4.461000.root";
 
-        g_2261_truereco[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/G18/Excl_Range1_Genie_2_56Fe_2.261000.root";
-        g_2261_truereco[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/G18/Incl_Range1_Genie_2_56Fe_2.261000.root";
-        g_2261_truereco[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/G18/Excl_Range2_Genie_2_56Fe_2.261000.root";
-        g_2261_truereco[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/G18/Incl_Range2_Genie_2_56Fe_2.261000.root";
-        g_2261_truereco[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/G18/Excl_Range3_Genie_2_56Fe_2.261000.root";
-        g_2261_truereco[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/G18/Incl_Range3_Genie_2_56Fe_2.261000.root";
-        g_4461_truereco[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/G18/Excl_Range1_Genie_2_56Fe_4.461000.root";
-        g_4461_truereco[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth_Reco/G18/Incl_Range1_Genie_2_56Fe_4.461000.root";
+        g_2261_truereco[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/G18/Excl_Range1_Genie_2_56Fe_2.261000.root";
+        g_2261_truereco[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/G18/Incl_Range1_Genie_2_56Fe_2.261000.root";
+        g_2261_truereco[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/G18/Excl_Range2_Genie_2_56Fe_2.261000.root";
+        g_2261_truereco[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/G18/Incl_Range2_Genie_2_56Fe_2.261000.root";
+        g_2261_truereco[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/G18/Excl_Range3_Genie_2_56Fe_2.261000.root";
+        g_2261_truereco[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/G18/Incl_Range3_Genie_2_56Fe_2.261000.root";
+        g_4461_truereco[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/G18/Excl_Range1_Genie_2_56Fe_4.461000.root";
+        g_4461_truereco[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth_Reco/G18/Incl_Range1_Genie_2_56Fe_4.461000.root";
 
-        g_2261_true[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/G18/Excl_Range1_Genie_2_56Fe_2.261000.root";
-        g_2261_true[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/G18/Incl_Range1_Genie_2_56Fe_2.261000.root";
-        g_2261_true[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/G18/Excl_Range2_Genie_2_56Fe_2.261000.root";
-        g_2261_true[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/G18/Incl_Range2_Genie_2_56Fe_2.261000.root";
-        g_2261_true[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/G18/Excl_Range3_Genie_2_56Fe_2.261000.root";
-        g_2261_true[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/G18/Incl_Range3_Genie_2_56Fe_2.261000.root";
-        g_4461_true[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/G18/Excl_Range1_Genie_2_56Fe_4.461000.root";
-        g_4461_true[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Truth/G18/Incl_Range1_Genie_2_56Fe_4.461000.root";
+        g_2261_true[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/G18/Excl_Range1_Genie_2_56Fe_2.261000.root";
+        g_2261_true[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/G18/Incl_Range1_Genie_2_56Fe_2.261000.root";
+        g_2261_true[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/G18/Excl_Range2_Genie_2_56Fe_2.261000.root";
+        g_2261_true[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/G18/Incl_Range2_Genie_2_56Fe_2.261000.root";
+        g_2261_true[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/G18/Excl_Range3_Genie_2_56Fe_2.261000.root";
+        g_2261_true[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/G18/Incl_Range3_Genie_2_56Fe_2.261000.root";
+        g_4461_true[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/G18/Excl_Range1_Genie_2_56Fe_4.461000.root";
+        g_4461_true[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Truth/G18/Incl_Range1_Genie_2_56Fe_4.461000.root";
 
-        susa_2261_truereco_rad[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Rad_Truth_Reco/Excl_Range1_Genie_3_56Fe_2.261000.root";
-        susa_2261_truereco_rad[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Rad_Truth_Reco/Incl_Range1_Genie_3_56Fe_2.261000.root";
-        susa_2261_truereco_rad[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Rad_Truth_Reco/Excl_Range2_Genie_3_56Fe_2.261000.root";
-        susa_2261_truereco_rad[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Rad_Truth_Reco/Incl_Range2_Genie_3_56Fe_2.261000.root";
-        susa_2261_truereco_rad[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Rad_Truth_Reco/Excl_Range3_Genie_3_56Fe_2.261000.root";
-        susa_2261_truereco_rad[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Rad_Truth_Reco/Incl_Range3_Genie_3_56Fe_2.261000.root";
-        susa_4461_truereco_rad[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Rad_Truth_Reco/Excl_Range1_Genie_3_56Fe_4.461000.root";
-        susa_4461_truereco_rad[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Corr_Sectors/Rad_Truth_Reco/Incl_Range1_Genie_3_56Fe_4.461000.root";
+        susa_2261_truereco_rad[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Rad_Truth_Reco/Excl_Range1_Genie_3_56Fe_2.261000.root";
+        susa_2261_truereco_rad[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Rad_Truth_Reco/Incl_Range1_Genie_3_56Fe_2.261000.root";
+        susa_2261_truereco_rad[1][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Rad_Truth_Reco/Excl_Range2_Genie_3_56Fe_2.261000.root";
+        susa_2261_truereco_rad[1][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Rad_Truth_Reco/Incl_Range2_Genie_3_56Fe_2.261000.root";
+        susa_2261_truereco_rad[2][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Rad_Truth_Reco/Excl_Range3_Genie_3_56Fe_2.261000.root";
+        susa_2261_truereco_rad[2][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Rad_Truth_Reco/Incl_Range3_Genie_3_56Fe_2.261000.root";
+        susa_4461_truereco_rad[0][0] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Rad_Truth_Reco/Excl_Range1_Genie_3_56Fe_4.461000.root";
+        susa_4461_truereco_rad[0][1] = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Acceptance/Third_Try/Rad_Truth_Reco/Incl_Range1_Genie_3_56Fe_4.461000.root";
 
         std::string second_en[3][2] = {{"2.261 Excl Range 1", "2.261 Incl Range 1"},{"2.261 Excl Range 2", "2.261 Incl Range 2"},{ "2.261 Excl Range 3", "2.261 Incl Range 3"}};
         std::string third_en[1][2] = {{"4.461 Excl Range 1","4.461 Incl Range 1"}}; 
@@ -98,6 +85,7 @@ void T_Fe56_sectors(bool make_plots = false) {
 
         int num_2261_sec = 3;
         int num_4461_sec = 3;
+
 
 // --------------------- Getting radiative correction histograms from MC ----------------
         TH1D* SuSA_2261_true_reco_rad[3][2][6];
@@ -109,20 +97,20 @@ void T_Fe56_sectors(bool make_plots = false) {
 
                         for(int r = 0; r < 3; r++) {
                                 if(p==0) { // Exclusive
-                                        SuSA_2261_true_reco_rad[r][p][s] = (TH1D*)SumProtSectorsAndInts(susa_2261_truereco_rad[r][p], s, false);
+                                        SuSA_2261_true_reco_rad[r][p][s] = (TH1D*)SumProtInts(susa_2261_truereco_rad[r][p], s, false);
                                 }
                                 if(p==1) { // Inclusive
-                                        SuSA_2261_true_reco_rad[r][p][s] = (TH1D*)SumElecSectorsAndInts(susa_2261_truereco_rad[r][p], s, false);
+                                        SuSA_2261_true_reco_rad[r][p][s] = (TH1D*)SumElecInts(susa_2261_truereco_rad[r][p], s, false);
                                 }
                                 UniversalE4vFunction(SuSA_2261_true_reco_rad[r][p][s],  FSIModelsToLabels["SuSav2_RadCorr_LFGM_Truth_WithFidAcc_UpdatedSchwinger"], "56Fe", "2_261", TString::Format("susa_2261_mom_truereco_rad"));
                         }
                 
                         for(int r = 0; r < 1; r++) {
                                 if(p==0) { // Exclusive
-                                        SuSA_4461_true_reco_rad[r][p][s] = (TH1D*)SumProtSectorsAndInts(susa_4461_truereco_rad[r][p], s, false);
+                                        SuSA_4461_true_reco_rad[r][p][s] = (TH1D*)SumProtInts(susa_4461_truereco_rad[r][p], s, false);
                                 }
                                 if(p==1) { // Inclusive
-                                        SuSA_4461_true_reco_rad[r][p][s] = (TH1D*)SumElecSectorsAndInts(susa_4461_truereco_rad[r][p], s, false);
+                                        SuSA_4461_true_reco_rad[r][p][s] = (TH1D*)SumElecInts(susa_4461_truereco_rad[r][p], s, false);
                                 }
                                 UniversalE4vFunction(SuSA_4461_true_reco_rad[r][p][s],  FSIModelsToLabels["SuSav2_RadCorr_LFGM_Truth_WithFidAcc_UpdatedSchwinger"], "56Fe", "4_461", TString::Format("susa_4461_mom_truereco_rad"));
                         }
@@ -149,16 +137,16 @@ void T_Fe56_sectors(bool make_plots = false) {
                         // 2.261 GeV
                         for(int r = 0; r < 3; r++) {
                                 if(p==0) { // Exclusive
-                                        SuSA_2261_true[r][p][s] = (TH1D*)SumProtSectorsAndInts(susa_2261_true[r][p], s, false);
-                                        SuSA_2261_true_reco[r][p][s] = (TH1D*)SumProtSectorsAndInts(susa_2261_truereco[r][p], s, false);
-                                        G_2261_true[r][p][s] = (TH1D*)SumProtSectorsAndInts(g_2261_true[r][p], s, false);
-                                        G_2261_true_reco[r][p][s] = (TH1D*)SumProtSectorsAndInts(g_2261_truereco[r][p], s, false);
+                                        SuSA_2261_true[r][p][s] = (TH1D*)SumProtInts(susa_2261_true[r][p], s, false);
+                                        SuSA_2261_true_reco[r][p][s] = (TH1D*)SumProtInts(susa_2261_truereco[r][p], s, false);
+                                        G_2261_true[r][p][s] = (TH1D*)SumProtInts(g_2261_true[r][p], s, false);
+                                        G_2261_true_reco[r][p][s] = (TH1D*)SumProtInts(g_2261_truereco[r][p], s, false);
                                 }
                                 if(p==1) { // Inclusive
-                                        SuSA_2261_true[r][p][s] = (TH1D*)SumElecSectorsAndInts(susa_2261_true[r][p], s, false);
-                                        SuSA_2261_true_reco[r][p][s] = (TH1D*)SumElecSectorsAndInts(susa_2261_truereco[r][p], s, false);
-                                        G_2261_true[r][p][s] = (TH1D*)SumElecSectorsAndInts(g_2261_true[r][p], s, false);
-                                        G_2261_true_reco[r][p][s] = (TH1D*)SumElecSectorsAndInts(g_2261_truereco[r][p], s, false);
+                                        SuSA_2261_true[r][p][s] = (TH1D*)SumElecInts(susa_2261_true[r][p], s, false);
+                                        SuSA_2261_true_reco[r][p][s] = (TH1D*)SumElecInts(susa_2261_truereco[r][p], s, false);
+                                        G_2261_true[r][p][s] = (TH1D*)SumElecInts(g_2261_true[r][p], s, false);
+                                        G_2261_true_reco[r][p][s] = (TH1D*)SumElecInts(g_2261_truereco[r][p], s, false);
                                 }
                                 UniversalE4vFunction(SuSA_2261_true[r][p][s],  FSIModelsToLabels["SuSav2_NoRadCorr_LFGM_Truth_WithoutFidAcc"], "56Fe","2_261", TString::Format("susa_2261_mom_%i%i%i",r,p,s));
                                 UniversalE4vFunction(G_2261_true[r][p][s],  FSIModelsToLabels["hA2018_Final_NoRadCorr_LFGM_Truth_WithoutFidAcc"], "56Fe","2_261", TString::Format("g_2261_mom_%i%i%i",r,p,s));
@@ -169,16 +157,16 @@ void T_Fe56_sectors(bool make_plots = false) {
                         // 4.461 GeV
                         for(int r = 0; r < 1; r++) {
                                 if(p==0) { // Exclusive
-                                        SuSA_4461_true[r][p][s] = (TH1D*)SumProtSectorsAndInts(susa_4461_true[r][p], s, false);
-                                        SuSA_4461_true_reco[r][p][s] = (TH1D*)SumProtSectorsAndInts(susa_4461_truereco[r][p], s, false);
-                                        G_4461_true[r][p][s] = (TH1D*)SumProtSectorsAndInts(g_4461_true[r][p], s, false);
-                                        G_4461_true_reco[r][p][s] = (TH1D*)SumProtSectorsAndInts(g_4461_truereco[r][p], s, false);
+                                        SuSA_4461_true[r][p][s] = (TH1D*)SumProtInts(susa_4461_true[r][p], s, false);
+                                        SuSA_4461_true_reco[r][p][s] = (TH1D*)SumProtInts(susa_4461_truereco[r][p], s, false);
+                                        G_4461_true[r][p][s] = (TH1D*)SumProtInts(g_4461_true[r][p], s, false);
+                                        G_4461_true_reco[r][p][s] = (TH1D*)SumProtInts(g_4461_truereco[r][p], s, false);
                                 }
                                 if(p==1) { // Inclusive
-                                        SuSA_4461_true[r][p][s] = (TH1D*)SumElecSectorsAndInts(susa_4461_true[r][p], s, false);
-                                        SuSA_4461_true_reco[r][p][s] = (TH1D*)SumElecSectorsAndInts(susa_4461_truereco[r][p], s, false);
-                                        G_4461_true[r][p][s] = (TH1D*)SumElecSectorsAndInts(g_4461_true[r][p], s, false);
-                                        G_4461_true_reco[r][p][s] = (TH1D*)SumElecSectorsAndInts(g_4461_truereco[r][p], s, false);
+                                        SuSA_4461_true[r][p][s] = (TH1D*)SumElecInts(susa_4461_true[r][p], s, false);
+                                        SuSA_4461_true_reco[r][p][s] = (TH1D*)SumElecInts(susa_4461_truereco[r][p], s, false);
+                                        G_4461_true[r][p][s] = (TH1D*)SumElecInts(g_4461_true[r][p], s, false);
+                                        G_4461_true_reco[r][p][s] = (TH1D*)SumElecInts(g_4461_truereco[r][p], s, false);
                                 }
                                 UniversalE4vFunction(SuSA_4461_true[r][p][s],  FSIModelsToLabels["SuSav2_NoRadCorr_LFGM_Truth_WithoutFidAcc"], "56Fe","4_461", TString::Format("susa_4461_mom_%i%i%i",r,p,s));
                                 UniversalE4vFunction(G_4461_true[r][p][s],  FSIModelsToLabels["hA2018_Final_NoRadCorr_LFGM_Truth_WithoutFidAcc"], "56Fe","4_461", TString::Format("g_4461_mom_%i%i%i",r,p,s));
@@ -201,6 +189,8 @@ void T_Fe56_sectors(bool make_plots = false) {
         TH1D* G_2261[3][2][6];
         double mec_corr_2261[3][2][6];
         double mec_corr_G_2261[3][2][6];
+        double mec_corr_tot_2261[3][2];
+        double mec_corr_tot_G_2261[3][2];
         double neutron_corr_2261_G18[3][2];
         double neutron_corr_2261_susa[3][2];
 
@@ -208,6 +198,8 @@ void T_Fe56_sectors(bool make_plots = false) {
         TH1D* G_4461[1][2][6];
         double mec_corr_4461[1][2][6];
         double mec_corr_G_4461[1][2][6];
+        double mec_corr_tot_4461[1][2];
+        double mec_corr_tot_G_4461[1][2];
         double neutron_corr_4461_G18[1][2];
         double neutron_corr_4461_susa[1][2];
 
@@ -219,31 +211,35 @@ void T_Fe56_sectors(bool make_plots = false) {
                         if(p == 0) {
                                 neutron_corr_2261_susa[r][p] = get_Neutron_corr(susa_2261[r][p], false);
                                 neutron_corr_2261_G18[r][p] = get_Neutron_corr(g_2261[r][p], false);
+                                mec_corr_tot_2261[r][p] = get_MEC_corr_overall(susa_2261[r][p], false);
+                                mec_corr_tot_G_2261[r][p] = get_MEC_corr_overall(g_2261[r][p], false);
                         }
                         if(p == 1) {
                                 neutron_corr_2261_susa[r][p] = get_Neutron_corr(susa_2261[r][p], true);
                                 neutron_corr_2261_G18[r][p] = get_Neutron_corr(g_2261[r][p], true); 
+                                mec_corr_tot_2261[r][p] = get_MEC_corr_overall(susa_2261[r][p], true);
+                                mec_corr_tot_G_2261[r][p] = get_MEC_corr_overall(g_2261[r][p], true);
                         }
-                        std::cout << "G18 N: " << neutron_corr_2261_G18[r][p] << "\n";
-                        std::cout << "SuSA N: " << neutron_corr_2261_susa[r][p] << "\n";
+                        std::cout << "G18 N: " << neutron_corr_2261_G18[r][p] << ", MEC: " << mec_corr_tot_G_2261[r][p] << "\n";
+                        std::cout << "SuSA N: " << neutron_corr_2261_susa[r][p] << ", MEC: " << mec_corr_tot_2261[r][p] << "\n";
                         for(int s : sectors) {
                                 if(p==0) { // Exclusive
-                                        SuSA_2261[r][p][s] = (TH1D*)SumProtSectorsAndInts(susa_2261[r][p], s, false);
-                                        G_2261[r][p][s] = (TH1D*)SumProtSectorsAndInts(g_2261[r][p], s, false);
+                                        SuSA_2261[r][p][s] = (TH1D*)SumProtInts(susa_2261[r][p], s, false);
+                                        G_2261[r][p][s] = (TH1D*)SumProtInts(g_2261[r][p], s, false);
                                         mec_corr_2261[r][p][s] = get_MEC_corr(susa_2261[r][p], s, false);
                                         mec_corr_G_2261[r][p][s] = get_MEC_corr(g_2261[r][p], s, false);
                                         
                                 }
                                 if(p==1) { // Inclusive
                                         s = (s+3)%6;
-                                        SuSA_2261[r][p][s] = (TH1D*)SumElecSectorsAndInts(susa_2261[r][p], s, false);
-                                        G_2261[r][p][s] = (TH1D*)SumElecSectorsAndInts(g_2261[r][p], s, false);
+                                        SuSA_2261[r][p][s] = (TH1D*)SumElecInts(susa_2261[r][p], s, false);
+                                        G_2261[r][p][s] = (TH1D*)SumElecInts(g_2261[r][p], s, false);
                                         mec_corr_2261[r][p][s] = get_MEC_corr(susa_2261[r][p], s, true);
                                         mec_corr_G_2261[r][p][s] = get_MEC_corr(g_2261[r][p], s, true);
                                         }
-                                std::cout << "sector " << s << "\n";
-                                std::cout << "SuSA MEC: " << mec_corr_2261[r][p][s] << "\n";
-                                std::cout << "G18 MEC:  " << mec_corr_G_2261[r][p][s] << "\n";
+                                //std::cout << "sector " << s << "\n";
+                                //std::cout << "SuSA MEC: " << mec_corr_2261[r][p][s] << "\n";
+                                //std::cout << "G18 MEC:  " << mec_corr_G_2261[r][p][s] << "\n";
                                 UniversalE4vFunction(SuSA_2261[r][p][s], FSIModelsToLabels["SuSav2_NoRadCorr_LFGM_Truth_WithFidAcc"], "56Fe","2_261", TString::Format("susa_2261_mom_reco_%i%i%i",r,p,s));
                                 UniversalE4vFunction(G_2261[r][p][s], FSIModelsToLabels["hA2018_Final_NoRadCorr_LFGM_Truth_WithFidAcc"], "56Fe","2_261", TString::Format("g_2261_mom_reco_%i%i%i",r,p,s));
                         }
@@ -256,31 +252,35 @@ void T_Fe56_sectors(bool make_plots = false) {
                         if( p == 0 ) {
                                 neutron_corr_4461_susa[r][p] = get_Neutron_corr(susa_4461[r][p], false);
                                 neutron_corr_4461_G18[r][p] = get_Neutron_corr(g_4461[r][p], false);
+                                mec_corr_tot_4461[r][p] = get_MEC_corr_overall(susa_4461[r][p], false);
+                                mec_corr_tot_G_4461[r][p] = get_MEC_corr_overall(g_4461[r][p], false);
                         }
                         if( p == 1 ) {
                                 neutron_corr_4461_susa[r][p] = get_Neutron_corr(susa_4461[r][p], true);
                                 neutron_corr_4461_G18[r][p] = get_Neutron_corr(g_4461[r][p], true); 
+                                mec_corr_tot_4461[r][p] = get_MEC_corr_overall(susa_4461[r][p], true);
+                                mec_corr_tot_G_4461[r][p] = get_MEC_corr_overall(g_4461[r][p], true);
                         }
-                       std::cout << "G18 N:  " << neutron_corr_4461_G18[r][p] << "\n";
-                       std::cout << "SuSA N: " << neutron_corr_4461_susa[r][p] << "\n";
+                        std::cout << "G18 N: " << neutron_corr_4461_G18[r][p] << ", MEC: " << mec_corr_tot_G_4461[r][p] << "\n";
+                        std::cout << "SuSA N: " << neutron_corr_4461_susa[r][p] << ", MEC: " << mec_corr_tot_4461[r][p] << "\n";
                         for(int s : sectors) {
                                 if(p==0) { // Exclusive
-                                        SuSA_4461[r][p][s] = (TH1D*)SumProtSectorsAndInts(susa_4461[r][p], s, false);
-                                        G_4461[r][p][s] = (TH1D*)SumProtSectorsAndInts(g_4461[r][p], s, false);
+                                        SuSA_4461[r][p][s] = (TH1D*)SumProtInts(susa_4461[r][p], s, false);
+                                        G_4461[r][p][s] = (TH1D*)SumProtInts(g_4461[r][p], s, false);
                                         mec_corr_4461[r][p][s] = get_MEC_corr(susa_4461[r][p], s, false); 
                                         mec_corr_G_4461[r][p][s] = get_MEC_corr(g_4461[r][p], s, false);  
                                 }
                                 if(p==1) { // Inclusive
 
                                         s = (s+3)%6;
-                                        SuSA_4461[r][p][s] = (TH1D*)SumElecSectorsAndInts(susa_4461[r][p], s, false);
-                                        G_4461[r][p][s] = (TH1D*)SumElecSectorsAndInts(g_4461[r][p], s, false);
+                                        SuSA_4461[r][p][s] = (TH1D*)SumElecInts(susa_4461[r][p], s, false);
+                                        G_4461[r][p][s] = (TH1D*)SumElecInts(g_4461[r][p], s, false);
                                         mec_corr_4461[r][p][s] = get_MEC_corr(susa_4461[r][p], s, true); 
                                         mec_corr_G_4461[r][p][s] = get_MEC_corr(g_4461[r][p], s, true);   
                                 }
-                                std::cout << "sector " << s << "\n";
-                                std::cout << "SuSA MEC: " << mec_corr_4461[r][p][s] << "\n";
-                                std::cout << "G18 MEC:  " << mec_corr_G_4461[r][p][s] << "\n";
+                                //std::cout << "sector " << s << "\n";
+                                //std::cout << "SuSA MEC: " << mec_corr_4461[r][p][s] << "\n";
+                                //std::cout << "G18 MEC:  " << mec_corr_G_4461[r][p][s] << "\n";
                                 UniversalE4vFunction(SuSA_4461[r][p][s], FSIModelsToLabels["SuSav2_NoRadCorr_LFGM_Truth_WithFidAcc"], "56Fe","4_461", TString::Format("susa_4461_mom_reco_%i%i%i",r,p,s));
                                 UniversalE4vFunction(G_4461[r][p][s], FSIModelsToLabels["hA2018_Final_NoRadCorr_LFGM_Truth_WithFidAcc"], "56Fe","4_461", TString::Format("g_4461_mom_reco_%i%i%i",r,p,s));                                          
                         }
@@ -298,17 +298,17 @@ void T_Fe56_sectors(bool make_plots = false) {
         for(int p = 0; p < 2; p++) {
                 for(int s : sectors) {
                         if(p == 0) { // Exclusive
-                                Data_2261[0][p][s] = (TH1D*)SumProtSectorsAndInts(data_2261[0][p], s, true);
-                                Data_2261[1][p][s] = (TH1D*)SumProtSectorsAndInts(data_2261[1][p], s, true);
-                                Data_2261[2][p][s] = (TH1D*)SumProtSectorsAndInts(data_2261[2][p], s, true);
-                                Data_4461[0][p][s] = (TH1D*)SumProtSectorsAndInts(data_4461[0][p], s, true);
+                                Data_2261[0][p][s] = (TH1D*)SumProtInts(data_2261[0][p], s, true);
+                                Data_2261[1][p][s] = (TH1D*)SumProtInts(data_2261[1][p], s, true);
+                                Data_2261[2][p][s] = (TH1D*)SumProtInts(data_2261[2][p], s, true);
+                                Data_4461[0][p][s] = (TH1D*)SumProtInts(data_4461[0][p], s, true);
                         }
                         if(p == 1) { // Inclusive
                                 s = (s+3)%6;
-                                Data_2261[0][p][s] = (TH1D*)SumElecSectorsAndInts(data_2261[0][p], s, true);
-                                Data_2261[1][p][s] = (TH1D*)SumElecSectorsAndInts(data_2261[1][p], s, true);
-                                Data_2261[2][p][s] = (TH1D*)SumElecSectorsAndInts(data_2261[2][p], s, true);
-                                Data_4461[0][p][s] = (TH1D*)SumElecSectorsAndInts(data_4461[0][p], s, true);
+                                Data_2261[0][p][s] = (TH1D*)SumElecInts(data_2261[0][p], s, true);
+                                Data_2261[1][p][s] = (TH1D*)SumElecInts(data_2261[1][p], s, true);
+                                Data_2261[2][p][s] = (TH1D*)SumElecInts(data_2261[2][p], s, true);
+                                Data_4461[0][p][s] = (TH1D*)SumElecInts(data_4461[0][p], s, true);
                         }
                         UniversalE4vFunction(Data_2261[0][p][s], "Pinned Data", "56Fe", "2_261", TString::Format("data %s %i",second_en[0][p].c_str(),s));
                         UniversalE4vFunction(Data_2261[1][p][s], "Pinned Data", "56Fe", "2_261", TString::Format("data %s %i",second_en[1][p].c_str(),s));
@@ -479,6 +479,7 @@ void T_Fe56_sectors(bool make_plots = false) {
                 
                 for(int r = 0; r < 1; r++) {
                         for(int s : sectors ) {
+                                //if(s == 3) continue;
                                 if(p == 1) s = (s+3)%6;
 
                                 if((p == 0 && s == 2) || (p == 1 && s == 5)) {
@@ -507,7 +508,8 @@ void T_Fe56_sectors(bool make_plots = false) {
 
                 for(int s : sectors) {
                         for(int p = 0; p < 2; p++) {
-                                if(p == 1) s = (s+3)%6;
+                                if(p == 1) s = (s+3)%6; 
+                                /*
                                 for(int r = 0; r< 3; r++ ) {
                                         leg2261[r][p][s] = new TLegend(0.7,0.75,0.89,0.89);
                                         SuSA_2261[r][p][s]->Draw("e hist");
@@ -527,7 +529,7 @@ void T_Fe56_sectors(bool make_plots = false) {
                                         leg2261[r][p][s]->Draw();
                                         SuSA_2261[r][p][s]->SetTitle(TString::Format("SuSA_v2 Fe56 %s Sector %i", second_en[r][p].c_str(), s));
                                         reco_dist_canvas->SaveAs("Fe56_reco_dist.pdf");
-                                }
+                                }*/
 
 
                                 for(int r = 0; r < 1; r++ ) {
@@ -539,13 +541,13 @@ void T_Fe56_sectors(bool make_plots = false) {
                                         G_4461[r][p][s]->Draw("e same");
                                         G_4461[r][p][s]->SetTitle("G18 Fe56");
                                         G_4461[r][p][s]->SetLineColor(kRed);
-                                        leg4461[r][p][s]->AddEntry(G_2261[r][p][s]);
+                                        leg4461[r][p][s]->AddEntry(G_4461[r][p][s]);
                                         Data_4461[r][p][s]->SetMarkerColor(kBlack);
                                         Data_4461[r][p][s]->SetMarkerStyle(20);
                                         SuSA_4461[r][p][s]->GetYaxis()->SetTitle("Absolute Number of Events");
                                         SuSA_4461[r][p][s]->GetXaxis()->SetTitle("Momentum (GeV)");
-                                        leg4461[r][p][s]->AddEntry(Data_2261[r][p][s]);
-                                        leg4461[r][p][s]->AddEntry(SuSA_2261[r][p][s]);
+                                        leg4461[r][p][s]->AddEntry(Data_4461[r][p][s]);
+                                        leg4461[r][p][s]->AddEntry(SuSA_4461[r][p][s]);
                                         leg4461[r][p][s]->Draw();
                                         SuSA_4461[r][p][s]->SetTitle(TString::Format("SuSA_v2 Fe56 %s Sector %i", third_en[r][p].c_str(), s));
                                         reco_dist_canvas->SaveAs("Fe56_reco_dist.pdf");
@@ -578,17 +580,17 @@ void T_Fe56_sectors(bool make_plots = false) {
                         data_comb_int_2261[r][p] = Data_comb_2261[r][p]->IntegralAndError(1, Data_comb_2261[r][p]->GetNbinsX(), data_comb_int_2261_err[r][p],"width");
                         SuSA_comb_int_2261[r][p] = SuSA_comb_2261[r][p]->IntegralAndError(1, SuSA_comb_2261[r][p]->GetNbinsX(), SuSA_comb_int_2261_err[r][p],"width");
                         G_comb_int_2261[r][p] = G_comb_2261[r][p]->IntegralAndError(1, G_comb_2261[r][p]->GetNbinsX(), G_comb_int_2261_err[r][p],"width");
-                                std::cout << "Data " << second_en[r][p] << " = " << data_comb_int_2261[r][p] << " p/m " << data_comb_int_2261_err[r][p] <<  "\n";
-                                std::cout << "SuSA " << second_en[r][p] << " = " << SuSA_comb_int_2261[r][p] << " p/m " << SuSA_comb_int_2261_err[r][p] << "\n";
-                                std::cout << "G    " << second_en[r][p] << " = " << G_comb_int_2261[r][p] << " p/m " << G_comb_int_2261_err[r][p] << "\n";
+                                //std::cout << "Data " << second_en[r][p] << " = " << data_comb_int_2261[r][p] << " p/m " << data_comb_int_2261_err[r][p] <<  "\n";
+                                //std::cout << "SuSA " << second_en[r][p] << " = " << SuSA_comb_int_2261[r][p] << " p/m " << SuSA_comb_int_2261_err[r][p] << "\n";
+                                //std::cout << "G    " << second_en[r][p] << " = " << G_comb_int_2261[r][p] << " p/m " << G_comb_int_2261_err[r][p] << "\n";
                 }
                 for(int r = 0; r < 1; r++) {
                         data_comb_int_4461[r][p] = Data_comb_4461[r][p]->IntegralAndError(1, Data_comb_4461[r][p]->GetNbinsX(), data_comb_int_4461_err[r][p],"width");
                         SuSA_comb_int_4461[r][p] = SuSA_comb_4461[r][p]->IntegralAndError(1, SuSA_comb_4461[r][p]->GetNbinsX(), SuSA_comb_int_4461_err[r][p],"width");
                         G_comb_int_4461[r][p] = G_comb_4461[r][p]->IntegralAndError(1, G_comb_4461[r][p]->GetNbinsX(), G_comb_int_4461_err[r][p],"width");
-                                std::cout << "Data " << third_en[r][p] << " = " << data_comb_int_4461[r][p] << " p/m " << data_comb_int_4461_err[r][p] << "\n";
-                                std::cout << "SuSA " << third_en[r][p] << " = " << SuSA_comb_int_4461[r][p] << " p/m " << SuSA_comb_int_4461_err[r][p] << "\n"; 
-                                std::cout << "G    " << third_en[r][p] << " = " << G_comb_int_4461[r][p] << " p/m " << G_comb_int_4461_err[r][p] << "\n";         
+                                //std::cout << "Data " << third_en[r][p] << " = " << data_comb_int_4461[r][p] << " p/m " << data_comb_int_4461_err[r][p] << "\n";
+                                //std::cout << "SuSA " << third_en[r][p] << " = " << SuSA_comb_int_4461[r][p] << " p/m " << SuSA_comb_int_4461_err[r][p] << "\n"; 
+                                //std::cout << "G    " << third_en[r][p] << " = " << G_comb_int_4461[r][p] << " p/m " << G_comb_int_4461_err[r][p] << "\n";         
                 }
         }
 
@@ -648,9 +650,9 @@ void T_Fe56_sectors(bool make_plots = false) {
                                 data_int_2261[r][p][s] = Data_2261[r][p][s]->IntegralAndError(1, Data_2261[r][p][s]->GetNbinsX(), data_int_2261_err[r][p][s],"width");
                                 SuSA_int_2261[r][p][s] = SuSA_2261[r][p][s]->IntegralAndError(1, SuSA_2261[r][p][s]->GetNbinsX(), SuSA_int_2261_err[r][p][s],"width");
                                 G_int_2261[r][p][s] = G_2261[r][p][s]->IntegralAndError(1, G_2261[r][p][s]->GetNbinsX(), G_int_2261_err[r][p][s],"width");
-                                std::cout << "Data " << second_en[r][p] << " = " << data_int_2261[r][p][s] << " p/m " << data_int_2261_err[r][p][s] << "\n";
-                                std::cout << "SuSA " << second_en[r][p] << " = " << SuSA_int_2261[r][p][s] << " p/m " << SuSA_int_2261_err[r][p][s]  << "\n";
-                                std::cout << "G    " << second_en[r][p] << " = " << G_int_2261[r][p][s] << " p/m " << G_int_2261_err[r][p][s]  << "\n";
+                                //std::cout << "Data " << second_en[r][p] << " = " << data_int_2261[r][p][s] << " p/m " << data_int_2261_err[r][p][s] << "\n";
+                                //std::cout << "SuSA " << second_en[r][p] << " = " << SuSA_int_2261[r][p][s] << " p/m " << SuSA_int_2261_err[r][p][s]  << "\n";
+                                //std::cout << "G    " << second_en[r][p] << " = " << G_int_2261[r][p][s] << " p/m " << G_int_2261_err[r][p][s]  << "\n";
                         }
 
                         //4461
@@ -658,9 +660,9 @@ void T_Fe56_sectors(bool make_plots = false) {
                                 data_int_4461[r][p][s] = Data_4461[r][p][s]->IntegralAndError(1, Data_4461[r][p][s]->GetNbinsX(), data_int_4461_err[r][p][s],"width");
                                 SuSA_int_4461[r][p][s] = SuSA_4461[r][p][s]->IntegralAndError(1, SuSA_4461[r][p][s]->GetNbinsX(), SuSA_int_4461_err[r][p][s],"width");
                                 G_int_4461[r][p][s] = G_4461[r][p][s]->IntegralAndError(1, G_4461[r][p][s]->GetNbinsX(), G_int_4461_err[r][p][s],"width");
-                                std::cout << "Data " << third_en[r][p] << " = " << data_int_4461[r][p][s] << " p/m " << data_int_4461_err[r][p][s]  << "\n";
-                                std::cout << "SuSA " << third_en[r][p] << " = " << SuSA_int_4461[r][p][s] << " p/m " << SuSA_int_4461_err[r][p][s]  << "\n";
-                                std::cout << "G    " << third_en[r][p] << " = " << G_int_4461[r][p][s] << " p/m " << G_int_4461_err[r][p][s]  << "\n";
+                                //std::cout << "Data " << third_en[r][p] << " = " << data_int_4461[r][p][s] << " p/m " << data_int_4461_err[r][p][s]  << "\n";
+                                //std::cout << "SuSA " << third_en[r][p] << " = " << SuSA_int_4461[r][p][s] << " p/m " << SuSA_int_4461_err[r][p][s]  << "\n";
+                                //std::cout << "G    " << third_en[r][p] << " = " << G_int_4461[r][p][s] << " p/m " << G_int_4461_err[r][p][s]  << "\n";
                         }
                 }
         }
@@ -776,6 +778,9 @@ void T_Fe56_sectors(bool make_plots = false) {
                 }
         }
 
+
+        //data_spread_T_4461[0] += diff_squared(data_T_4461[0][2], data_T_4461[0][4]);
+
         // Take sqrt of sector by sector uncertainty and then add them to overall uncertainty 
         data_spread_T_2261[0] = sqrt(data_spread_T_2261[0]/num_2261_sec);
         data_spread_T_2261[1] = sqrt(data_spread_T_2261[1]/num_2261_sec);
@@ -790,19 +795,19 @@ void T_Fe56_sectors(bool make_plots = false) {
         SuSA_spread_T_2261[1] = sqrt(SuSA_spread_T_2261[1]/num_2261_sec);
         SuSA_spread_T_2261[2] = sqrt(SuSA_spread_T_2261[2]/num_2261_sec);
         SuSA_spread_T_4461[0] = sqrt(SuSA_spread_T_4461[0]/num_4461_sec);
-        std::cout << "susa spread 2261 range 1 = " << data_spread_T_2261[0] << "\n";
-        std::cout << "susa spread 2261 range 2 = " << data_spread_T_2261[1] << "\n";
-        std::cout << "susa spread 2261 range 3 = " << data_spread_T_2261[2] << "\n";
-        std::cout << "susa spread 4461 range 1 = " << data_spread_T_4461[0] << "\n";
+        std::cout << "susa spread 2261 range 1 = " << SuSA_spread_T_2261[0] << "\n";
+        std::cout << "susa spread 2261 range 2 = " << SuSA_spread_T_2261[1] << "\n";
+        std::cout << "susa spread 2261 range 3 = " << SuSA_spread_T_2261[2] << "\n";
+        std::cout << "susa spread 4461 range 1 = " << SuSA_spread_T_4461[0] << "\n";
 
         G_spread_T_2261[0] = sqrt(G_spread_T_2261[0]/num_2261_sec);
         G_spread_T_2261[1] = sqrt(G_spread_T_2261[1]/num_2261_sec);
         G_spread_T_2261[2] = sqrt(G_spread_T_2261[2]/num_2261_sec);
         G_spread_T_4461[0] = sqrt(G_spread_T_4461[0]/num_4461_sec);
-        std::cout << "G spread 2261 range 1 = " << data_spread_T_2261[0] << "\n";
-        std::cout << "G spread 2261 range 2 = " << data_spread_T_2261[1] << "\n";
-        std::cout << "G spread 2261 range 3 = " << data_spread_T_2261[2] << "\n";
-        std::cout << "G spread 4461 range 1 = " << data_spread_T_4461[0] << "\n";
+        std::cout << "G spread 2261 range 1 = " << G_spread_T_2261[0] << "\n";
+        std::cout << "G spread 2261 range 2 = " << G_spread_T_2261[1] << "\n";
+        std::cout << "G spread 2261 range 3 = " << G_spread_T_2261[2] << "\n";
+        std::cout << "G spread 4461 range 1 = " << G_spread_T_4461[0] << "\n";
 
         //Get combined transparencies and errors
         data_comb_T_2261[0] = myratio(data_comb_int_2261[0][0],data_comb_int_2261[0][1]);
@@ -951,6 +956,7 @@ void T_Fe56_sectors(bool make_plots = false) {
         data_comb_t->SetMarkerStyle(kFullCircle);
         data_comb_t->GetXaxis()->SetTitle("Proton Momentum (GeV)");
         data_comb_t->GetYaxis()->SetTitle("Transparency");
+ 	data_comb_t->GetYaxis()->SetRangeUser(0,1.2);
         data_comb_t->SetMarkerColor(12);
         data_comb_t->Draw("AP");
         
@@ -978,7 +984,8 @@ void T_Fe56_sectors(bool make_plots = false) {
         susa_comb_t->SetMarkerStyle(kFullCircle);
         susa_comb_t->GetXaxis()->SetTitle("Proton Momentum (GeV)");
         susa_comb_t->GetYaxis()->SetTitle("Transparency");
-        susa_comb_t->SetMarkerColor(12);
+        susa_comb_t->GetYaxis()->SetRangeUser(0,1.2);
+	susa_comb_t->SetMarkerColor(12);
         susa_comb_t->Draw("AP");
 
         for(int s : sectors){
@@ -1004,8 +1011,9 @@ void T_Fe56_sectors(bool make_plots = false) {
         G_comb_t->SetMarkerStyle(kFullCircle);
         G_comb_t->GetXaxis()->SetTitle("Proton Momentum (GeV)");
         G_comb_t->GetYaxis()->SetTitle("Transparency");
-        G_comb_t->SetMarkerColor(12);
-        G_comb_t->Draw("AP");
+        G_comb_t->SetMarkerColor(12);        
+        G_comb_t->GetYaxis()->SetRangeUser(0,1.2);
+	G_comb_t->Draw("AP");
 
         for(int s : sectors){
 
@@ -1038,297 +1046,12 @@ void T_Fe56_sectors(bool make_plots = false) {
         c_comb->BuildLegend();
 
 
- /*       TFile *final = TFile::Open("T_Fe56_sectors.root", "RECREATE");
-        c_data->Write("data");
-        c_susa->Write("SuSA");
-        c_
-        final->Close();  */  
+        TFile *final = TFile::Open("T_Fe56_sectors.root", "RECREATE");
+        Data_trans->Write("data_Fe56");
+        G18_trans->Write("G_Fe56");
+        SuSA_trans->Write("SuSA_Fe56");
+        //c_susa->Write("SuSA");
+        //c_
+        final->Close();  
 }
-
-double get_Neutron_corr(TString file, bool incl) {
-
-        TFile *F = TFile::Open( TString( file ) );
-        TH1D* hit_nuc;
-        
-        if (incl == true) {
-                hit_nuc = (TH1D*)F->Get("h1_hit_nuc");
-        }
-
-        if (incl == false) {
-                hit_nuc = (TH1D*)F->Get("h1_hit_nuc_pass");
-        }
-
-        double protons = hit_nuc->GetBinContent(1);
-        double neutrons = hit_nuc->GetBinContent(2);
-
-        if((neutrons + protons) == 0.0) return 0;
-        else return protons/(neutrons + protons);
-
-}
-
-double get_MEC_corr(TString file, int sector, bool incl) {   
-        TFile *input = TFile::Open( TString( file ) );
-
-        TH1D* mom_Int[4];
-        TH1D* total;
-
-        if( incl == true ) {
-                for(int i = 0; i < 4; i++) {
-                        mom_Int[i] = (TH1D*)input->Get(TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", i+1, (sector) ));
-                }
-                
-        }
-
-        if( incl == false ) {
-                for(int i = 0; i < 4; i++) {
-                        mom_Int[i] = (TH1D*)input->Get(TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom_QE__%i", i+1, sector));
-                }
-        }
-
-        total = (TH1D*) mom_Int[0]->Clone();
-        total->Add(mom_Int[1]); total->Add(mom_Int[2]); total->Add(mom_Int[3]);
-
-        double mec_int = mom_Int[1]->Integral("width");
-        double total_int = total->Integral("width");
-        if (total_int == 0.0) return 0;
-
-        return mec_int/total_int;
-}
-
-TH1D* SumElecSectorsAndInts(TString file, int sector, bool isData) {
-        TFile *input = TFile::Open( TString( file ) );
-
-        TH1D* el_mom;
-        TH1D* el_mom_Int[6];
-        TH1D* el_mom_d;
-
-        if ( isData == false ) { 
-                        for (int i = 0; i < 4; i++) { // for all the interactions
-
-                                // extract the histrograms
-                                el_mom_Int[i] = (TH1D*)input->Get( TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", i+1, (sector) ));
-                                if( i == 0 ) el_mom = (TH1D*)( el_mom_Int[i]->Clone() );
-                                else el_mom->Add(el_mom_Int[i]);
-                        }
-        }
-
-        if ( isData == true ) {
-                el_mom_d = (TH1D*)input->Get( TString::Format("h1_0_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", (sector) ));
-                el_mom = (TH1D*) ( el_mom_d->Clone() );
-        }
-
-        el_mom->Rebin( 40 );
-        return el_mom;
-}
-
-TH1D* SumProtSectorsAndInts(TString file, int sector, bool isData) {
-        TFile *input = TFile::Open( TString( file ) );
-
-        TH1D* h1_prot_momentum;
-        TH1D* h1_prot_momentum_d;
-        TH1D* h1_prot_mom_InteractionBreakDown_inSector[4];
-
-        if ( isData == false ) {
-                for (int i = 0; i < 4; i++) { // for all the interactions
-
-                        // extract the histrograms
-                        h1_prot_mom_InteractionBreakDown_inSector[i] = (TH1D*)input->Get( TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom_QE__%i", i+1, sector) );
-                        if(i == 0) h1_prot_momentum = (TH1D*)( h1_prot_mom_InteractionBreakDown_inSector[i]->Clone() );
-                        else h1_prot_momentum->Add( h1_prot_mom_InteractionBreakDown_inSector[i] );
-                }
-        }
-
-        if ( isData == true ) {
-               
-                h1_prot_momentum_d = (TH1D*)input->Get( TString::Format("h1_0_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom_QE__%i", sector));
-                h1_prot_momentum = (TH1D*)( h1_prot_momentum_d->Clone() );
-        }
-
-        h1_prot_momentum->Rebin( 40 );
-        return h1_prot_momentum;
-}
-
-TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* G_true, TH1D* G_truereco, TH1D* susa_truereco_rad, bool make_plots, std::string type) {
-
-        //Make sure we have a non empty histogram
-        if(hist->GetEntries() == 0.0) return hist;
-        
-        TH1D::SetDefaultSumw2();
-
-        TH1D* OverallClone = (TH1D*)hist->Clone();
-
-        TH1D* susa_correction = (TH1D*)susa_true->Clone();
-        TH1D* G_correction = (TH1D*)G_true->Clone();
-
-        susa_correction->Divide(susa_truereco);
-        G_correction->Divide(G_truereco);
-
-        TH1D* Average = (TH1D*)(susa_correction->Clone());
-        Average->Add(G_correction);
-        Average->Scale(0.5);
-
-        TH1D* RadCorrection = (TH1D*)susa_truereco->Clone();
-        RadCorrection->Divide(susa_truereco_rad);
-
-        if(make_plots) {
-                TString tCanvasName = TString::Format("true_vs_reco_%s",hist->GetTitle());
-                TCanvas* tPlotCanvas = new TCanvas(tCanvasName,tCanvasName,205,34,1024,768);
-                if(type == "SuSA") {
-                        susa_true->GetYaxis()->SetTitle("Scaled number of events");
-                        susa_true->GetXaxis()->SetTitle("Momentum (GeV)");
-                        susa_true->SetTitle(TString::Format("True %s",hist->GetTitle()));
-                        susa_truereco->SetTitle(TString::Format("Reco %s",hist->GetTitle()));
-                        susa_true->SetLineColor(kRed);
-                        susa_true->Draw("e hist");
-                        susa_truereco->Draw("e hist same");
-                }
-                if(type == "G") {
-                        G_true->GetYaxis()->SetTitle("Scaled number of events");
-                        G_true->GetXaxis()->SetTitle("Momentum (GeV)");
-                        G_true->SetTitle(TString::Format("True %s",hist->GetTitle()));
-                        G_truereco->SetTitle(TString::Format("Reco %s",hist->GetTitle()));
-                        G_true->SetLineColor(kRed);
-                        G_true->Draw("e hist");
-                        G_truereco->Draw("e hist same"); 
-                }
-                tPlotCanvas->BuildLegend();
-                tPlotCanvas->SaveAs("Fe56_true_vs_truereco.pdf");
-
-
-                TString trCanvasName = TString::Format("radrec_vs_noradreco_%s",hist->GetTitle());
-                TCanvas* trPlotCanvas = new TCanvas(trCanvasName,trCanvasName,205,34,1024,768);
-                susa_truereco->GetYaxis()->SetTitle("Scaled number of events");
-                susa_truereco->GetXaxis()->SetTitle("Momentum (GeV)");
-                susa_truereco->Draw("e hist");
-                susa_truereco->SetLineColor(kBlack);
-                susa_truereco_rad->SetLineColor(kGreen);
-                susa_truereco_rad->SetTitle(TString::Format("Reco Rad %s",hist->GetTitle()));
-                susa_truereco_rad->Draw("e hist same");
-                trPlotCanvas->BuildLegend();
-                trPlotCanvas->SaveAs("Fe56_truerecorad_vs_truereco.pdf");
-        }
-        
-        int NBins = OverallClone->GetXaxis()->GetNbins();
-        double AccCorrTolerance = 5;
-
-        for (int WhichBin = 0; WhichBin < NBins; WhichBin++) {
-                double AccCorr = 0.;
-                double RadCorr = 0.;
-
-                double NewBinContent = 0.;
-                double NewBinError = 0.;
-
-                if(type == "G") AccCorr = G_correction->GetBinContent(WhichBin + 1);
-                else if(type == "SuSA") AccCorr = susa_correction->GetBinContent(WhichBin + 1);
-                else AccCorr = Average->GetBinContent(WhichBin + 1);
-
-                if (AccCorr < 0 || AccCorr > AccCorrTolerance) {
-                        double CorrectionSuSav2Bin = susa_correction->GetBinContent(WhichBin + 1);
-                        double CorrectionG2018Bin = G_correction->GetBinContent(WhichBin + 1);
-
-                        if (CorrectionSuSav2Bin > 0 && CorrectionSuSav2Bin < AccCorrTolerance) { AccCorr = CorrectionSuSav2Bin; }
-                        else if (CorrectionG2018Bin > 0 && CorrectionG2018Bin < AccCorrTolerance) { AccCorr = CorrectionG2018Bin; }
-                        else { AccCorr = 0.; }
-
-                }
-                
-                
-                RadCorr = RadCorrection->GetBinContent(WhichBin + 1);
-                if(RadCorr <= 0.) RadCorr = 1.;
-                if(AccCorr <= 0.) AccCorr = 1.;
-                if(type != "data") RadCorr = 1.;
-
-                NewBinContent = hist->GetBinContent(WhichBin + 1) * AccCorr * RadCorr;
-                NewBinError = hist->GetBinError(WhichBin + 1) * AccCorr * RadCorr;
-
-                OverallClone->SetBinContent(WhichBin + 1, NewBinContent);
-                OverallClone->SetBinError(WhichBin + 1, NewBinError);
-        }
-
-        if(make_plots) {
-          TString CanvasName = TString::Format("AccCorrCanvas_%s",hist->GetTitle());
-          TCanvas* PlotCanvas = new TCanvas(CanvasName,CanvasName,205,34,1024,768);
-          Average->GetYaxis()->SetTitle("Detector Acceptance Correction");
-          Average->GetXaxis()->SetTitle("Momentum (GeV)");
-          Average->Draw("e hist");
-          Average->SetTitle(TString::Format("%s",hist->GetTitle()));
-          PlotCanvas->SaveAs("Fe56_Acceptance_Ratios.pdf");
-
-          TString RadCanvasName = TString::Format("RadCorrCanvas_%s",hist->GetTitle());
-          TCanvas* RadPlotCanvas = new TCanvas(RadCanvasName,RadCanvasName,205,34,1024,768);
-          RadCorrection->GetYaxis()->SetTitle("Radiative Correction");
-          RadCorrection->GetXaxis()->SetTitle("Momentum (GeV)");
-          RadCorrection->SetTitle(TString::Format("%s", hist->GetTitle()));
-          RadCorrection->Draw("e hist");
-          RadPlotCanvas->SaveAs("Fe56_Rad_Ratios.pdf");
-        }
-
-        TH1D* Spread = (TH1D*)susa_correction->Clone();
-        Spread->Add(G_correction, -1);
-        Spread->Divide(Average);
-        Spread->Scale(1./TMath::Sqrt(12.));
-
-        int NBinsSpread = Spread->GetXaxis()->GetNbins();
-
-        for (int WhichBin = 0; WhichBin < NBinsSpread; WhichBin++) {
-
-                double BinContent = Spread->GetBinContent(WhichBin+1);
-                if (BinContent < 0) { Spread->SetBinContent(WhichBin+1,-BinContent); }
-
-        }
-
-        if(type == "data") {
-                for (int WhichBin = 0; WhichBin < NBinsSpread; WhichBin++) {
-
-                        double SpreadBinContent = Spread->GetBinContent(WhichBin+1);
-                        double XSecBinError = OverallClone->GetBinError(WhichBin+1);
-                        double XSecBinEntry = OverallClone->GetBinContent(WhichBin+1);
-                        double AccCorrError = SpreadBinContent * XSecBinEntry;
-                        double NewXSecBinError = TMath::Sqrt( TMath::Power(XSecBinError,2.) + TMath::Power(AccCorrError,2.) );
-                        if(NewXSecBinError < XSecBinError) {
-                                std::cout << "Something wrong, errors should increase!" << "\n";
-                                std::cout << "Previous bin error: " << XSecBinError << "\n";
-                                std::cout << "Updated bin error: " << NewXSecBinError << "\n";
-                        }
-                        OverallClone->SetBinError(WhichBin+1,NewXSecBinError);
-
-                }
-        }
-        
-
-        return OverallClone;
-}
-
-double get_ratio_error(double num, double denom) {
-        // Binomial errors for transparency ratio
-        if (denom == 0. || isnan(num) || isnan(denom)) {
-                std::cout << "Is this happening?" << "\n";
-                return 0.;
-        }
-        double p = num/denom;
-        double q = 1. - p;
-        //std::cout << sqrt(denom * p * q) << "\n";
-        return sqrt(denom * p * q);
-}
-
-void printit(std::string s, double x) {
-        std::cout << s << " = " << x << "\n";
-}
-
-double diff_squared(double x, double y) {
-        if (isnan(x) || isnan(y) || x == 0.0 || y == 0.0) return 0.;
-        //std::cout << (x-y)*(x-y) << "\n";
-        return (x - y)*(x - y); 
-}
-
-double myratio(double x, double y) {
-        if(y == 0. || isnan(x) || isnan(y)) return 0.;
-        if (x > y) {
-                std::cout << "Something is wrong!" << "\n";
-                std::cout << "Ratio = " << x/y << "\n";
-        }
-        return x/y;
-}
-
-
 
