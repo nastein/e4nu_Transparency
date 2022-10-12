@@ -87,7 +87,8 @@ void genie_analysis::Loop() {
     bool UsePhiThetaBand = false;
 
     double PtMax = 0.2; // gchamber: max pt cut (1e1p spectrum)
-	double Em_ub = 999999999999999999999999;        
+	double Em_ub = 999999999;
+	double theta_pq_cut = 20.;        
 
 	std::cout << "UseAllSectors = " << UseAllSectors << "\n";
     std::cout << "ApplyFiducials = " << ApplyFiducials << "\n";
@@ -128,7 +129,7 @@ void genie_analysis::Loop() {
 	nentries = 30000000;
 
 	if (nentries < fChain->GetEntriesFast()) { 
-		std::cout << "nentries IS HARD CODED AND LESS THAN THE ACTUAL NUMBER OF EVENTS IN THIS FILE!!!" << std::endl << std::endl;
+		std::cout << "NENTRIES IS LESS THAN THE ACTUAL NUMBER OF EVENTS IN THIS FILE!!!" << "\n";
 	}	
 	if (nentries > fChain->GetEntriesFast()) {
 		nentries = fChain->GetEntriesFast();
@@ -1442,23 +1443,26 @@ void genie_analysis::Loop() {
 					double Em = (nu - ProtonTK);
 					TVector3 pmiss_vec =  V3_rot_q - V3_2prot_corr[f];				
 					double pmiss = pmiss_vec.Mag();
-					double ThetaPQ = V3_rot_q.Angle(V3_2prot_corr[f]) * 180. / TMath::Pi();
-					//std::cout << "Angle = " << ThetaPQ << "\n";                               
+					double ThetaPQ = V3_rot_q.Angle(V3_2prot_corr[f]) * 180. / TMath::Pi();                              
 	 
 					if (Em > Em_ub)  {continue;}
+
+					if(ThetaPQ > theta_pq_cut) { continue; }//Looking at ThetaPQ cut
 
 					// gchamber: below are cuts on proton angles. These cuts are in each topology block	
 					if (fApplyThetaSliceProt) {  // hard coded range for now
 						if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
 						if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
 					}
+
+
 			
-                        	        if (fApplyPhiOpeningAngleProt) {
-                                	        if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                        	    && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
-                                                	continue; 
-                                        	}  
-                                	}
+        	        if (fApplyPhiOpeningAngleProt) {
+                	        if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
+                        	    && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
+                                	continue; 
+                        	}  
+                	}
 
                     if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { 
 						same_sector_bool = false;
@@ -1644,22 +1648,25 @@ void genie_analysis::Loop() {
 					TVector3 pmiss_vec =  V3_rot_q - V3_2prot_corr[z];				
 					double pmiss = pmiss_vec.Mag();
 					double ThetaPQ = V3_rot_q.Angle(V3_2prot_corr[z]) * 180. / TMath::Pi();		
-                                        if (Em > Em_ub)  {continue;}
+                    
+                    if (Em > Em_ub)  {continue;}
+
+					if(ThetaPQ > theta_pq_cut) { continue; }//Looking at ThetaPQ cut
 					
 					if (fApplyThetaSliceProt) {  // hard coded range for now
 						if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
 						if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
 					}
 			
-                                	if (fApplyPhiOpeningAngleProt) {
-                                        	if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                        	    && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
-                                	                continue; 
-                        	                }  
-                	                }
+	            	if (fApplyPhiOpeningAngleProt) {
+	                    	if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
+	                    	    && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
+	            	                continue; 
+	    	                }  
+	                }
 
-        	                        if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; } 
-	                                if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
+                    if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; } 
+                    if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
 
 	
 					h2_el_CosTheta_E->Fill(V3_el.CosTheta(),V4_el.E(),P_2p1pito2p0pi[z]*histoweight);
@@ -2029,22 +2036,25 @@ void genie_analysis::Loop() {
 					TVector3 pmiss_vec =  V3_rot_q - V3_2prot_corr[z];				
 					double pmiss = pmiss_vec.Mag();
 					double ThetaPQ = V3_rot_q.Angle(V3_2prot_corr[z]) * 180. / TMath::Pi();						
-                                        if (Em > Em_ub)  {continue;}
+                    
+                    if (Em > Em_ub)  {continue;}
+
+					if(ThetaPQ > theta_pq_cut) { continue; }//Looking at ThetaPQ cut
 
 					if (fApplyThetaSliceProt) {  // hard coded range for now
 						if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
 						if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
 					}
 
-                        	        if (fApplyPhiOpeningAngleProt) {
-                                	        if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                        	    && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
-                                                	continue; 
-                                       		}  
-                                	}
+        	        if (fApplyPhiOpeningAngleProt) {
+                	        if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
+                        	    && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
+                                	continue; 
+                       		}  
+                	}
 
-                                	if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; } 
-	                                if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
+                	if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; } 
+                    if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
 
 					h2_el_CosTheta_E->Fill(V3_el.CosTheta(),V4_el.E(),Ptot_2p[z]*histoweight);
 
@@ -2250,22 +2260,25 @@ void genie_analysis::Loop() {
 						TVector3 pmiss_vec =  V3_rot_q - V3_prot_corr[j];				
 						double pmiss = pmiss_vec.Mag();
 						double ThetaPQ = V3_rot_q.Angle(V3_prot_corr[j]) * 180. / TMath::Pi();
-                                        	if (Em > Em_ub)  {continue;}
+                    	
+                    	if (Em > Em_ub)  {continue;}
+
+						if(ThetaPQ > theta_pq_cut) { continue; }//Looking at ThetaPQ cut
 						
 						if (fApplyThetaSliceProt) {  // hard coded range for now
 							if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
 							if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
 						}
 			
-                                        	if (fApplyPhiOpeningAngleProt) {
-                                                	if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                        	            && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
-                                	                        continue;
-                        	                        }
-                	                        }
+                    	if (fApplyPhiOpeningAngleProt) {
+                            	if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
+                    	            && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
+            	                        continue;
+    	                        }
+                        }
 
-        	                                if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
-		                                if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
+                        if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
+                        if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
 
 						h2_el_CosTheta_E->Fill(V3_el.CosTheta(),V4_el.E(),P_3pto2p[count][j]*histoweight);
 
@@ -2387,22 +2400,24 @@ void genie_analysis::Loop() {
 					double pmiss = pmiss_vec.Mag();
 					double ThetaPQ = V3_rot_q.Angle(V3_prot_corr[j]) * 180. / TMath::Pi();
 
-                                        if (Em > Em_ub)  {continue;}
+                    if (Em > Em_ub)  {continue;}
+
+					if(ThetaPQ > theta_pq_cut) { continue; }//Looking at ThetaPQ cut
 
 					if (fApplyThetaSliceProt) {  // hard coded range for now
 						if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
 						if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
 					}
 			
-                                        if (fApplyPhiOpeningAngleProt) {
-                                                if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                                    && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
-                                                        continue;
-                                                }
-                                        }
+                    if (fApplyPhiOpeningAngleProt) {
+                            if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
+                                && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
+                                    continue;
+                            }
+                    }
 
-                                        if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
-	                                if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
+                    if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
+                    if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
 
 					h2_el_CosTheta_E->Fill(V3_el.CosTheta(),V4_el.E(),-P_3pto1p[j]*histoweight);
 
@@ -2575,22 +2590,24 @@ void genie_analysis::Loop() {
 					double pmiss = pmiss_vec.Mag();
 					double ThetaPQ = V3_rot_q.Angle(V3_prot_corr[j]) * 180. / TMath::Pi();				
 	
-                                        if (Em > Em_ub)  {continue;}
+                    if (Em > Em_ub)  {continue;}
+
+					if(ThetaPQ > theta_pq_cut) { continue; }//Looking at ThetaPQ cut
 					
 					if (fApplyThetaSliceProt) {  // hard coded range for now
 						if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
 						if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
 					}
 			
-                                        if (fApplyPhiOpeningAngleProt) {
-                                                if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                                    && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
-                                                        continue;
-                                                }
-                                        }
+                    if (fApplyPhiOpeningAngleProt) {
+                            if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
+                                && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
+                                    continue;
+                            }
+                    }
 
-                                        if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
-	                                if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
+                    if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
+                    if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
 
 					h2_el_CosTheta_E->Fill(V3_el.CosTheta(),V4_el.E(),P_tot_3p[j]*histoweight);
 
@@ -3049,21 +3066,23 @@ void genie_analysis::Loop() {
 				double ThetaPQ = V3_rot_q.Angle(V3_prot_corr) * 180. / TMath::Pi();
                 		
                 if (Em > Em_ub)  {continue;}
+
+				if(ThetaPQ > theta_pq_cut) { continue; }//Looking at ThetaPQ cut
 						
 				if (fApplyThetaSliceProt) {  // hard coded range for now
 					if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
 					if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
 				}
 
-                                if (fApplyPhiOpeningAngleProt) {
-                                        if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                            && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
-                                                continue;
-                                        }
-                                }
+                if (fApplyPhiOpeningAngleProt) {
+                        if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
+                            && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
+                                continue;
+                        }
+                }
 
-                                if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
-                                if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
+                if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
+                if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
 
 				h2_el_CosTheta_E->Fill(V3_el.CosTheta(),V4_el.E(),histoweight);
 
@@ -3260,22 +3279,24 @@ void genie_analysis::Loop() {
 					double pmiss = pmiss_vec.Mag();
 					double ThetaPQ = V3_rot_q.Angle(V3_prot_corr) * 180. / TMath::Pi();
 				
-                                        if (Em > Em_ub)  {continue;}
+                    if (Em > Em_ub)  {continue;}
+
+					if(ThetaPQ > theta_pq_cut) { continue; }//Looking at ThetaPQ cut
 					
 					if (fApplyThetaSliceProt) {  // hard coded range for now
 						if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
 						if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
 					}
 			
-                                        if (fApplyPhiOpeningAngleProt) {
-                                                if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                                    && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
-                                                        continue;
-                                                }
-                                        }
+                    if (fApplyPhiOpeningAngleProt) {
+                            if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
+                                && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
+                                    continue;
+                            }
+                    }
 
-                                        if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
-	                                if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
+                    if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
+                	if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
 
 					h2_el_CosTheta_E->Fill(V3_el.CosTheta(),V4_el.E(),-(N_piphot_undet/N_piphot_det)*histoweight);
 
@@ -3455,21 +3476,23 @@ void genie_analysis::Loop() {
 					double ThetaPQ = V3_rot_q.Angle(V3_prot_corr) * 180. / TMath::Pi();                                 
        
 					if (Em > Em_ub)  {continue;}
+
+					if(ThetaPQ > theta_pq_cut) { continue; }//Looking at ThetaPQ cut
 				
 					if (fApplyThetaSliceProt) {  // hard coded range for now
 						if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
 						if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
 					}
 			
-                                        if (fApplyPhiOpeningAngleProt) {
-                                                if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                                    && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
-                                                        continue;
-                                                }
-                                        }
+                    if (fApplyPhiOpeningAngleProt) {
+                            if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
+                                && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
+                                    continue;
+                            }
+                    }
 
-                                        if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
-	                                if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
+                    if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
+                    if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
 
 					h2_el_CosTheta_E->Fill(V3_el.CosTheta(),V4_el.E(),P_1p1pi[z]*histoweight);
 
@@ -3586,22 +3609,24 @@ void genie_analysis::Loop() {
 				double pmiss = pmiss_vec.Mag();
 				double ThetaPQ = V3_rot_q.Angle(V3_prot_corr) * 180. / TMath::Pi();
 	
-                                if (Em > Em_ub)  {continue;}
+                if (Em > Em_ub)  {continue;}
+
+				if(ThetaPQ > theta_pq_cut) { continue; }//Looking at ThetaPQ cut
 				
 				if (fApplyThetaSliceProt) {  // hard coded range for now
 					if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
 					if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
 				}
 
-                                if (fApplyPhiOpeningAngleProt) {
-                                        if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                            && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
-                                                continue;
-                                        }
-                                }
+                if (fApplyPhiOpeningAngleProt) {
+                        if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
+                            && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
+                                continue;
+                        }
+                }
 
-                                if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
-                                if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
+                if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
+                if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
 
 				h2_el_CosTheta_E->Fill(V3_el.CosTheta(),V4_el.E(),-P_1p0pi*histoweight);
 
@@ -3775,21 +3800,23 @@ void genie_analysis::Loop() {
 				double pmiss = pmiss_vec.Mag();
 				double ThetaPQ = V3_rot_q.Angle(V3_prot_corr) * 180. / TMath::Pi();
 					
-                                if (Em > Em_ub)  {continue;}
+                if (Em > Em_ub)  {continue;}
+
+				if(ThetaPQ > theta_pq_cut) { continue; }//Looking at ThetaPQ cut
 				
 				if (fApplyThetaSliceProt) {  // hard coded range for now
 					if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
 					if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
 				}
 			
-                                if (fApplyPhiOpeningAngleProt) {
-                                        if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                            && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
-                                                continue;
-                                        }
-                                }
- 
-                                if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
+                if (fApplyPhiOpeningAngleProt) {
+                        if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
+                            && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 270) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) {
+                                continue;
+                        }
+                }
+
+                if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
 				if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal())) { continue; }
 
 				h2_el_CosTheta_E->Fill(V3_el.CosTheta(),V4_el.E(),P_1p3pi*histoweight);
