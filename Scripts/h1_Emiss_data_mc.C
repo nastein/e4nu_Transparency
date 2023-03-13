@@ -31,9 +31,11 @@
 #include <stdio.h>
 //#include "myFunctions.cpp"
 #include "parse_file.C"
-#include "../Analyze_data/myFunctions.cpp"
+#include "../Transparency/myFunctions.h"
 
 void h1_Emiss_data_mc(std::string sim, std::string targ, std::string beamen, std::string range, std::string type){
+    gStyle->SetOptTitle(0);
+    gStyle->SetOptStat(0);
 
         // declare variables that will be used in the plotting/formatting of histograms and file names
     std::string info1 ("");
@@ -55,11 +57,13 @@ void h1_Emiss_data_mc(std::string sim, std::string targ, std::string beamen, std
     if(targ == "4He") flipped_target = "He4";
     if(targ == "C12") flipped_target = "C12";
 
-    //file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/"+sim+"/"+type+"_Range"+range+"_Genie_"+sim_num+"_"+targ+"_"+beamen+".root";
-    //file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample_3/"+flipped_target+"/"+type+"_Range"+range+"_Data__"+targ+"_"+beamen+".root";
+    //if(sim == "SuSAv2") file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/ThetaPQCut/"+sim+"/"+type+"_Range"+range+"_Genie_"+sim_num+"_"+targ+"_"+beamen+".root";
+    //file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_SampleThetaPQ/"+flipped_target+"/"+type+"_Range"+range+"_Data__"+targ+"_"+beamen+".root";
 
-    file_name2= "/genie/app/users/nsteinbe/grahams_e4nu/Analyze_data/testData__C12_2.261000.root";
-    file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/Analyze_data/testGenie_2_C12_2.261000.root";
+
+
+    file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/Cut_BreakDown/ProtMom_Cut/Excl_Range_2_Genie_1_56Fe_2.261000.root";
+    file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/Cut_BreakDown/ProtMom_Cut/Excl_Range2_Data__56Fe_2.261000.root";
 
     TFile *input1 = TFile::Open( TString(file_name1));
     TFile *input2 = TFile::Open( TString(file_name2));
@@ -77,9 +81,10 @@ void h1_Emiss_data_mc(std::string sim, std::string targ, std::string beamen, std
     cuts2 = parse2[1];
 
     std::string beam_en;
-    if(info1.find("1.161")!= std::string::npos) {beam_en = "1_161";}
-    else if(info1.find("2.261")!= std::string::npos) {beam_en = "2_261";}
-    else {beam_en = "4_461";}
+    double beam_en_dbl;
+    if(info1.find("1.161")!= std::string::npos) {beam_en = "1_161"; beam_en_dbl = 1.161;}
+    else if(info1.find("2.261")!= std::string::npos) {beam_en = "2_261"; beam_en_dbl = 2.261;}
+    else {beam_en = "4_461"; beam_en_dbl = 4.461;}
 
     std::string target;
     if(info1.find("C12")!= std::string::npos) {target = "12C";}
@@ -92,12 +97,12 @@ void h1_Emiss_data_mc(std::string sim, std::string targ, std::string beamen, std
     std::cout << "Analyzed beam en: " << beam_en << "\n";
 
     // histogram initialization
-    TH1D* h1_Emiss_mc_total;
+    TH1D* h1_Emiss_mc_total = new TH1D("","",10,0,0.4);
     TH1D* h1_Emiss_InteractionBreakDown_inSector_mc[4][6];
     TH1D* h1_Emiss_mc_int[4];
     TH1D* h1_Emiss_data[6];
 
-    TH1D* h1_Pmiss_mc_total;
+    TH1D* h1_Pmiss_mc_total = new TH1D("","",100, 0, 1.0);
     TH1D* h1_Pmiss_InteractionBreakDown_inSector_mc[4][6];
     TH1D* h1_Pmiss_mc_int[4];
     TH1D* h1_Pmiss_data[6];
@@ -110,14 +115,13 @@ void h1_Emiss_data_mc(std::string sim, std::string targ, std::string beamen, std
 	for (int i = 0; i < 4; i++) { // for all the interactions
 	    for (int j = 0; j < 6; j++) { // for all the sectors
     		// extract the histrograms
-    		h1_Emiss_InteractionBreakDown_inSector_mc[i][j] = (TH1D*)input1->Get(TString::Format("h1_Int_%i_Sect_%i_Em", i+1, j));    
-    	    	//Add everything to the first sector
-            	if(i == 0 && j == 0) h1_Emiss_mc_total = (TH1D*)h1_Emiss_InteractionBreakDown_inSector_mc[i][j]->Clone();
-            	if(i != 0 ||  j != 0) h1_Emiss_mc_total->Add(h1_Emiss_InteractionBreakDown_inSector_mc[i][j]);
-	    	if(j == 0) h1_Emiss_mc_int[i] = (TH1D*)h1_Emiss_InteractionBreakDown_inSector_mc[i][j]->Clone();
-		if(j != 0) h1_Emiss_mc_int[i]->Add(h1_Emiss_InteractionBreakDown_inSector_mc[i][j]);
+    		h1_Emiss_InteractionBreakDown_inSector_mc[i][j] = (TH1D*)input1->Get(TString::Format("h1_Int_%i_Sect_%i_Em", i+1, j)); 
+            h1_Emiss_mc_total->Add(h1_Emiss_InteractionBreakDown_inSector_mc[i][j]);
+            if(j == 0) h1_Emiss_mc_int[i] = (TH1D*)h1_Emiss_InteractionBreakDown_inSector_mc[i][j]->Clone();
+            else h1_Emiss_mc_int[i]->Add(h1_Emiss_InteractionBreakDown_inSector_mc[i][j]); 
 	   }
 	}
+
 
     for (int i = 0; i < 6; i++) { // for all the sectors
 		h1_Emiss_data[i] = (TH1D*)input2->Get( TString::Format("h1_Int_0_Sect_%i_Em", i));
@@ -129,26 +133,24 @@ void h1_Emiss_data_mc(std::string sim, std::string targ, std::string beamen, std
     }
 
     UniversalE4vFunction(h1_Emiss_mc_total,  sim_label, target, beam_en, TString(info1)+TString(cuts1));
-    for(int i = 0; i < 4; i++) {
-	UniversalE4vFunction(h1_Emiss_mc_int[i], sim_label, target, beam_en, TString(info1)+TString(cuts1));
-    }
-    UniversalE4vFunction(h1_Emiss_data[0],  "Pinned Data", target, beam_en, TString(info2));
+    PrettyDoubleXSecPlot(h1_Emiss_mc_total, 2, beam_en_dbl, 4, false);
+
     
-   std::cout << "Integral of MC total for first 2 bins = " << h1_Emiss_mc_total->Integral(0,3)<< "\n";
-   std::cout << "Integral of MC MEC for first 2 bins = " << h1_Emiss_mc_int[1]->Integral(0,3)<< "\n";
-   std::cout << "MEC contamination = " << h1_Emiss_mc_int[1]->Integral(0,3)/h1_Emiss_mc_total->Integral(0,3) << "\n";
-  
+    for(int i = 0; i < 4; i++) {
+	   UniversalE4vFunction(h1_Emiss_mc_int[i], sim_label, target, beam_en, TString(info1)+TString(cuts1));
+        PrettyDoubleXSecPlot(h1_Emiss_mc_int[i], 2, beam_en_dbl, 4, false);
+    }
+    
+    UniversalE4vFunction(h1_Emiss_data[0],  "Pinned Data", target, beam_en, TString(info2));
 
     for (int i = 0; i < 4; i++) { // for all the interactions
         for (int j = 0; j < 6; j++) { // for all the sectors
             // extract the histrograms
-            h1_Pmiss_InteractionBreakDown_inSector_mc[i][j] = (TH1D*)input1->Get(TString::Format("h1_Int_%i_Sect_%i_Pm", i+1, j));    
-            //Add everything to the first sector
-            if(i == 0 && j == 0) h1_Pmiss_mc_total = (TH1D*)h1_Pmiss_InteractionBreakDown_inSector_mc[i][j]->Clone();
-       	    
-                if(i != 0 || j != 0) h1_Pmiss_mc_total->Add(h1_Pmiss_InteractionBreakDown_inSector_mc[i][j]);
-                if(j == 0) h1_Pmiss_mc_int[i] = (TH1D*)h1_Pmiss_InteractionBreakDown_inSector_mc[i][j]->Clone();
-                if(j != 0) h1_Pmiss_mc_int[i]->Add(h1_Pmiss_InteractionBreakDown_inSector_mc[i][j]); 
+            h1_Pmiss_InteractionBreakDown_inSector_mc[i][j] = (TH1D*)input1->Get(TString::Format("h1_Int_%i_Sect_%i_Pm", i+1, j)); 
+            h1_Pmiss_mc_total->Add( h1_Pmiss_InteractionBreakDown_inSector_mc[i][j]);
+            if(j == 0) h1_Pmiss_mc_int[i] = (TH1D*)h1_Pmiss_InteractionBreakDown_inSector_mc[i][j]->Clone();
+            else h1_Pmiss_mc_int[i]->Add(h1_Pmiss_InteractionBreakDown_inSector_mc[i][j]);   
+            
        }
     }
 
@@ -162,8 +164,10 @@ void h1_Emiss_data_mc(std::string sim, std::string targ, std::string beamen, std
     }
 
     UniversalE4vFunction(h1_Pmiss_mc_total,  sim_label, target, beam_en, TString(info1)+TString(cuts1));
+    PrettyDoubleXSecPlot(h1_Pmiss_mc_total, 2, beam_en_dbl, 4, false);
     for(int i = 0; i < 4; i++) {
         UniversalE4vFunction(h1_Pmiss_mc_int[i], sim_label, target, beam_en, TString(info1)+TString(cuts1));
+        PrettyDoubleXSecPlot(h1_Pmiss_mc_int[i], 2, beam_en_dbl, 4, false);
     }
     UniversalE4vFunction(h1_Pmiss_data[0],  "Pinned Data", target, beam_en, TString(info2));
     
@@ -199,32 +203,40 @@ void h1_Emiss_data_mc(std::string sim, std::string targ, std::string beamen, std
     const int color_options[4] = {kBlue, kAzure+10, kGreen-3, kViolet};
 
     TCanvas* c3;
-    c3 = new TCanvas(TString::Format("c3"), TString::Format("c3"), 1000, 1000);
+    c3 = new TCanvas(TString::Format("c3"), TString::Format("c3"), 1200, 1000);
     c3->Divide(2,2);
+
+    c3->SetLeftMargin( 0.2);
+    c3->SetBottomMargin( 0.2);
+    c3->SetRightMargin( 0.2);
+    c3->Update();
+
     c3->cd(1);
     // format the histograms
     h1_Emiss_data[0]->Sumw2();
-    h1_Emiss_data[0]->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
-    h1_Emiss_data[0]->GetXaxis()->SetTitle("Missing Energy [MeV]");
-    h1_Emiss_data[0]->GetYaxis()->SetTitle("Events");
-    h1_Emiss_data[0]->GetXaxis()->CenterTitle( true);
-    h1_Emiss_data[0]->GetYaxis()->CenterTitle( true);
-    h1_Emiss_data[0]->SetTitle(TString(info2)+TString(cuts2));
-    h1_Emiss_data[0]->SetMarkerStyle(2);
+    h1_Emiss_data[0]->SetStats( 0); 
+    h1_Emiss_mc_total->GetXaxis()->SetTitle("Missing Energy (GeV)");
+    h1_Emiss_mc_total->GetYaxis()->SetTitle("Scaled Events");
+    h1_Emiss_mc_total->SetTitle(TString(info2)+TString(cuts2));
+    h1_Emiss_data[0]->SetMarkerStyle(kFullCircle);
+    h1_Emiss_data[0]->SetMarkerSize(1.5);
     h1_Emiss_data[0]->SetMarkerColor(kBlack);
 
-    
-    h1_Emiss_mc_total->SetLineColor(kRed);
-    h1_Emiss_mc_total->GetYaxis()->SetRangeUser(0, 1.1*h1_Emiss_mc_total->GetMaximum());
-    h1_Emiss_mc_total->Draw("HIST"); 
-    for(int i = 0; i < 4; i++) {
-    	h1_Emiss_mc_int[i]->SetLineColor(color_options[i]);
-	h1_Emiss_mc_int[i]->GetYaxis()->SetRangeUser(0,h1_Emiss_mc_total->GetMaximum());
-	h1_Emiss_mc_int[i]->Draw("HIST SAME");
-    }
-    h1_Emiss_data[0]->Draw("HIST E SAME");
-	
+    h1_Emiss_mc_total->SetLineColor(kBlack);
 
+    double max = 1.1*h1_Emiss_mc_total->GetMaximum();
+    h1_Emiss_mc_total->GetYaxis()->SetRangeUser(0, max);
+    h1_Emiss_mc_total->Draw("HIST"); 
+    
+    for(int i = 0; i < 4; i++) {
+        h1_Emiss_mc_int[i]->SetLineColor(color_options[i]);
+        h1_Emiss_mc_int[i]->Draw("HIST SAME");
+    }
+    
+    
+    h1_Emiss_data[0]->Draw("P E SAME");
+	
+    /*
     // draw a legend for our plot
     TLegend *legend = new TLegend( 0.6, 0.625, 0.825, 0.875);
     legend->AddEntry( h1_Emiss_mc_total, sim.c_str());
@@ -236,31 +248,34 @@ void h1_Emiss_data_mc(std::string sim, std::string targ, std::string beamen, std
     legend->SetBorderSize( 0);
     legend->SetFillStyle( 0);
     legend->Draw();
+    */
 
     c3->cd(2);
     // format the histograms
     h1_Pmiss_data[0]->Sumw2();
     h1_Pmiss_data[0]->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
-    h1_Pmiss_data[0]->GetXaxis()->SetTitle("Missing Momentum [MeV]");
-    h1_Pmiss_data[0]->GetYaxis()->SetTitle("Events");
-    h1_Pmiss_data[0]->GetXaxis()->CenterTitle( true);
-    h1_Pmiss_data[0]->GetYaxis()->CenterTitle( true);
-    h1_Pmiss_data[0]->SetTitle(TString(info2)+TString(cuts2));
-    h1_Pmiss_data[0]->SetMarkerStyle(2);
+    h1_Pmiss_mc_total->GetXaxis()->SetTitle("Missing Momentum (GeV)");
+    h1_Pmiss_mc_total->GetYaxis()->SetTitle("Events");
+    h1_Pmiss_mc_total->SetTitle(TString(info2)+TString(cuts2));
+
+
+    h1_Pmiss_data[0]->SetMarkerStyle(kFullCircle);
+    h1_Pmiss_data[0]->SetMarkerSize(1.5);
     h1_Pmiss_data[0]->SetMarkerColor(kBlack);
     
-    h1_Pmiss_mc_total->SetLineColor(kRed);
-	    h1_Pmiss_mc_total->GetYaxis()->SetRangeUser(0,1.1* h1_Pmiss_mc_total->GetMaximum());
+    h1_Pmiss_mc_total->SetLineColor(kBlack);
+    //double maxP = 1.1*h1_Pmiss_mc_total->GetMaximum();
+	    //h1_Pmiss_mc_total->GetYaxis()->SetRangeUser(0,maxP);
+
     h1_Pmiss_mc_total->Draw("HIST"); 
     for(int i = 0; i < 4; i++) {
         h1_Pmiss_mc_int[i]->SetLineColor(color_options[i]);
-        h1_Pmiss_mc_int[i]->GetYaxis()->SetRangeUser(0,h1_Pmiss_mc_total->GetMaximum());
        h1_Pmiss_mc_int[i]->Draw("HIST SAME");
      }
-    h1_Pmiss_data[0]->Draw("HIST E SAME");   
+    h1_Pmiss_data[0]->Draw("P E SAME");   
  
     // draw a legend for our plot
-    TLegend *legend2 = new TLegend( 0.6, 0.625, 0.825, 0.875);
+    TLegend *legend2 = new TLegend(.82,.65,.99,.85);
     legend2->AddEntry( h1_Pmiss_mc_total, sim.c_str());
     legend2->AddEntry( h1_Pmiss_data[0], "CLAS data");
     
@@ -276,8 +291,8 @@ void h1_Emiss_data_mc(std::string sim, std::string targ, std::string beamen, std
     // format the histograms
     h1_EmissPmiss_data[0]->Sumw2();
     h1_EmissPmiss_data[0]->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
-    h1_EmissPmiss_data[0]->GetXaxis()->SetTitle("Missing Energy [MeV]");
-    h1_EmissPmiss_data[0]->GetYaxis()->SetTitle("Missing Momentum [MeV]");
+    h1_EmissPmiss_data[0]->GetXaxis()->SetTitle("Missing Energy (GeV)");
+    h1_EmissPmiss_data[0]->GetYaxis()->SetTitle("Missing Momentum (GeV)");
     h1_EmissPmiss_data[0]->GetXaxis()->CenterTitle( true);
     h1_EmissPmiss_data[0]->GetYaxis()->CenterTitle( true);
     h1_EmissPmiss_data[0]->SetTitle("CLAS data");
@@ -288,20 +303,17 @@ void h1_Emiss_data_mc(std::string sim, std::string targ, std::string beamen, std
 
     h1_EmissPmiss_mc_total->Sumw2();
     h1_EmissPmiss_mc_total->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
-    h1_EmissPmiss_mc_total->GetXaxis()->SetTitle("Missing Energy [MeV]");
-    h1_EmissPmiss_mc_total->GetYaxis()->SetTitle("Missing Momentum [MeV]");
+    h1_EmissPmiss_mc_total->GetXaxis()->SetTitle("Missing Energy (GeV)");
+    h1_EmissPmiss_mc_total->GetYaxis()->SetTitle("Missing Momentum (GeV)");
     h1_EmissPmiss_mc_total->GetXaxis()->CenterTitle( true);
     h1_EmissPmiss_mc_total->GetYaxis()->CenterTitle( true);
-    h1_EmissPmiss_mc_total->SetTitle(sim.c_str());
+    //h1_EmissPmiss_mc_total->SetTitle(sim.c_str());
     h1_EmissPmiss_mc_total->SetMarkerStyle(2);
     //h1_EmissPmiss_mc_total[0]->SetMarkerColor(kRed);
     c3->cd(4);
     h1_EmissPmiss_mc_total->Draw("COLZ");
 
-    // crop the margins of the canvas
-    c3->SetLeftMargin( 0.14);
-    c3->SetBottomMargin( 0.14);
-    c3->Update();
+    c3->SaveAs(TString::Format("EmPm_%s_%s_%s.pdf",targ.c_str(), beamen.c_str(), range.c_str()));
 
     
 }

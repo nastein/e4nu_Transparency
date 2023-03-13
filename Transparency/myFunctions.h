@@ -1,3 +1,6 @@
+#ifndef MYFUNCTIONS_H
+#define MYFUNCTIONS_H
+
 #include "TMath.h"
 #include <TProfile.h>
 #include <TH1D.h>
@@ -12,7 +15,7 @@
 #include <map>
 #include <utility>
 
-#include "NoahConstants.h"
+#include "AfroConstants.h"
 
 using namespace std;
 
@@ -68,7 +71,7 @@ void GlobalSettings() {
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 
-void ReweightPlots(TH1D* h) {
+void ReweightPlots(TH1D* h, int range = 0) {
 
 	double NBins = h->GetNbinsX(); 
 				
@@ -77,11 +80,14 @@ void ReweightPlots(TH1D* h) {
 		double content = h->GetBinContent(i);
 		double error = h->GetBinError(i);
 		double width = h->GetBinWidth(i);
+		//std::cout << "width before = " << width << "\n";
+		if(range == 0 || range == 3) width *= 20*2*pow(TMath::DegToRad(),2);
+		if(range == 1 || range == 2) width *= 20*3*pow(TMath::DegToRad(),2); 
 		double newcontent = content / width;
 		double newerror = error / width;				
 		h->SetBinContent(i,newcontent);
 		h->SetBinError(i,newerror);
-
+		//std::cout << "width after  = " << width << "\n";
 	}
 
 }
@@ -275,12 +281,12 @@ TString ToStringDouble(double num) {
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 
-void PrettyDoubleXSecPlot(TH1D* h) {
+void PrettyDoubleXSecPlot(TH1D* h, int p, double E, int r ,bool xsec = false) {
 
 	// ----------------------------------------------------------------------------------------------------------------
 
-	h->SetLineWidth(LineWidth);
-
+	h->SetLineWidth(2);
+	h->GetYaxis()->SetMaxDigits(2);
 	// ----------------------------------------------------------------------------------------------------------------
 
 	// X-axis
@@ -290,8 +296,23 @@ void PrettyDoubleXSecPlot(TH1D* h) {
 	h->GetXaxis()->SetTitleFont(FontStyle);
 	h->GetXaxis()->SetLabelSize(TextSize);
 	h->GetXaxis()->SetTitleSize(TextSize);
-	h->GetXaxis()->SetTitleOffset(1.05);
+	//h->GetXaxis()->SetTitleOffset(1.05);
 	h->GetXaxis()->SetNdivisions(Ndivisions);
+	if (p == 0) {
+		h->GetXaxis()->SetRangeUser(0.2,2.);
+		h->GetXaxis()->SetTitle("Proton Momentum (GeV)");
+	}
+	if (p == 1) {
+		if (E == 2.261) h->GetXaxis()->SetRangeUser(1.2, 2.5);
+		if (E == 4.461) h->GetXaxis()->SetRangeUser(3., 4.5);
+		h->GetXaxis()->SetTitle("Electron Momentum (GeV)");
+	}
+	if (xsec == true) {
+		if(p == 0) h->GetYaxis()->SetTitle("d#sigma/dp (1e-38 cm2/rad^{2} GeV)");
+		if(p == 1) h->GetYaxis()->SetTitle("d#sigma/dp (1e-38 cm2/rad GeV)");
+		ReweightPlots(h,r);
+	}
+        if (xsec == false) h->GetYaxis()->SetTitle("Scaled Number of Events");
 
 	// ----------------------------------------------------------------------------------------------------------------
 
@@ -301,10 +322,10 @@ void PrettyDoubleXSecPlot(TH1D* h) {
 	h->GetYaxis()->SetTitleSize(TextSize); 
 	//h->GetYaxis()->SetTickSize(0.02);
 	h->GetYaxis()->SetLabelSize(TextSize);
-	h->GetYaxis()->SetTitle(DoubleXSecTitle);
+	//h->GetYaxis()->SetTitle(DoubleXSecTitle);
 	h->GetYaxis()->SetTitleFont(FontStyle);
 	h->GetYaxis()->SetLabelFont(FontStyle);
-	h->GetYaxis()->SetTitleOffset(1.05);
+	//h->GetYaxis()->SetTitleOffset(1.05);
 	h->GetYaxis()->SetNdivisions(Ndivisions);
 
 	return;	
@@ -317,8 +338,9 @@ void PrettyGraph(TGraph* h) {
 
 	// ----------------------------------------------------------------------------------------------------------------
 
-	h->SetLineWidth(LineWidth);
-
+	h->SetLineWidth(2);
+	h->SetMarkerSize(1.5);
+	h->SetMarkerStyle(kFullCircle);
 	// ----------------------------------------------------------------------------------------------------------------
 
 	// X-axis
@@ -328,7 +350,7 @@ void PrettyGraph(TGraph* h) {
 	h->GetXaxis()->SetTitleFont(FontStyle);
 	h->GetXaxis()->SetLabelSize(TextSize);
 	h->GetXaxis()->SetTitleSize(TextSize);
-	h->GetXaxis()->SetTitleOffset(1.05);
+	//h->GetXaxis()->SetTitleOffset(1.05);
 	h->GetXaxis()->SetNdivisions(Ndivisions);
 
 	// ----------------------------------------------------------------------------------------------------------------
@@ -339,10 +361,10 @@ void PrettyGraph(TGraph* h) {
 	h->GetYaxis()->SetTitleSize(TextSize); 
 	//h->GetYaxis()->SetTickSize(0.02);
 	h->GetYaxis()->SetLabelSize(TextSize);
-	h->GetYaxis()->SetTitle(DoubleXSecTitle);
+	//h->GetYaxis()->SetTitle(DoubleXSecTitle);
 	h->GetYaxis()->SetTitleFont(FontStyle);
 	h->GetYaxis()->SetLabelFont(FontStyle);
-	h->GetYaxis()->SetTitleOffset(1.05);
+	//h->GetYaxis()->SetTitleOffset(1.05);
 	h->GetYaxis()->SetNdivisions(Ndivisions);
 
 	return;	
@@ -365,7 +387,6 @@ void AbsoluteXSecScaling(TH1D* h, TString Sample, TString Nucleus, TString E) {
 						    TargetLength[std::make_pair(Nucleus, E)] *\
 						    TargetDensity[std::make_pair(Nucleus, E)] *\
 						    OverallUnitConversionFactor / MassNumber[Nucleus] ) * ConversionFactorCm2ToMicroBarn;
-
 	}
 
 	else if (Sample == "Data_FilterRuns") { 
@@ -450,7 +471,15 @@ void AbsoluteXSecScaling(TH1D* h, TString Sample, TString Nucleus, TString E) {
 					ConversionFactorCm2ToMicroBarn / (NoRadSuSav2NumberEvents[std::make_pair(Nucleus, E)] ) ) ;
 
 	}
+	/*
+	else if(Sample == "SuSav2 NoRad less") {
 
+
+				SF = (SuSav2GenieXSec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
+                                        ConversionFactorCm2ToMicroBarn / (NoRadSuSav2NumberEventsLess[std::make_pair(Nucleus, E)] ) ) ;
+
+	}
+	*/
 	else if (Sample == "SuSav2 Master NoRad") { 
 
 				SF = (SuSav2GenieXSec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
@@ -492,7 +521,14 @@ void AbsoluteXSecScaling(TH1D* h, TString Sample, TString Nucleus, TString E) {
 					ConversionFactorCm2ToMicroBarn / (NoRadG2018NumberEvents[std::make_pair(Nucleus, E)] ) ) ;
 
 	}
+	/*
+	else if (Sample == "G2018 NoRad less") {
 
+                                SF = (G2018GenieXSec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
+                                        ConversionFactorCm2ToMicroBarn / (NoRadG2018NumberEventsLess[std::make_pair(Nucleus, E)] ) ) ;
+
+        }
+	*/
 	else if (Sample == "G2018") { 
 
 		SF = ( G2018GenieXSec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
@@ -520,11 +556,12 @@ void AbsoluteXSecScaling(TH1D* h, TString Sample, TString Nucleus, TString E) {
 					ConversionFactorCm2ToMicroBarn / (QEMasterRadG2018NumberEvents[std::make_pair(Nucleus, E)] ) );
 
 	}
-
+	
 	else  if(Sample == "SF") {
                 SF = (SFGenieXsec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
                                         ConversionFactorCm2ToMicroBarn / (SFNumberEvents[std::make_pair(Nucleus, E)] ) );
         }
+	
 
 //	else if (Sample == "G18_02c NoRad") { 
 
@@ -545,7 +582,7 @@ void AbsoluteXSecScaling(TH1D* h, TString Sample, TString Nucleus, TString E) {
 		std::cout << "Craaaaaaaaaaaaaaap !!!!!!!!! What is the SF in AbsoluteXSecScaling for " << h->GetName() << " in " << Sample << "???????????????" << std::endl;
 
 	}		
-
+	//std::cout << "Scale factor = " << SF << "\n";
 	h->Scale(SF);
 
 }
@@ -652,12 +689,13 @@ void AbsoluteXSec2DScaling(TH2D* h, TString Sample, TString Nucleus, TString E) 
 					dOmega) );
 
 	}	
-
+	/*
 	if(Sample == "SF") {
 		SF = (SFGenieXsec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
                                         ConversionFactorCm2ToMicroBarn / (SFNumberEvents[std::make_pair(Nucleus, E)] *\
                                         dOmega) );
 	}
+	*/
 
 
 	h->Scale(SF);
@@ -914,13 +952,16 @@ void ApplyRange(TGraph* h, TString Energy, TString PlotVar) {
 }
 // -------------------------------------------------------------------------------------------------------------------------------------
 
-void UniversalE4vFunction(TH1D* h, TString DataSetLabel, TString nucleus, TString E, TString name) {
+void UniversalE4vFunction(TH1D* h, TString DataSetLabel, TString nucleus, TString E, TString name, int range = 4) {
 
 	// Scale to obtain absolute double differential cross sections 
 	// Use charge, density and length for data samples
 	// Use total number of events in genie sample and relevant genie cross sections for simulation
 
-       
+	//std::cout << DataSetLabel << "\n";
+	//std::cout << nucleus << "\n";
+	//std::cout << E << "\n";
+	//std::cout << name << "\n";       
 	h->SetTitle(name);
         //std::cout << "hist title = " << h->GetTitle() << "\n";
 	AbsoluteXSecScaling(h,DataSetLabel,nucleus,E);
@@ -931,7 +972,7 @@ void UniversalE4vFunction(TH1D* h, TString DataSetLabel, TString nucleus, TStrin
 
 	// Division by the bin width
 
-	//ReweightPlots(h);
+//	ReweightPlots(h,range);
 
 	// Use relevant ranges
 			
@@ -1633,4 +1674,4 @@ TPad* CreateTPad(int WhichEnergy, int WhichNucleus, double Energy, TString nucle
 // -------------------------------------------------------------------------------------------------------------------------------------
 
 
-
+#endif

@@ -454,7 +454,9 @@ genie_analysis::genie_analysis(std::string a_filename, std::string a_target, std
     }
     // Proton momentum lower and  upper bounds
     //if((a_protMom_lb + a_protMom_ub) > 0 && a_protMom_lb < a_protMom_ub) {
+       //testing effect of proton momentum cut on missing energy and momentum distributions
         t_ProtMom_lb->SetVal(0); t_ProtMom_ub->SetVal(99999);
+        // t_ProtMom_lb->SetVal(0.8);
         fApplyProtMomCut = false;
     //}
 

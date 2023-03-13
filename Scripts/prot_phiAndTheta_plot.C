@@ -93,7 +93,7 @@ void prot_phiAndTheta_plot( std::string file_name){
     c->SetBottomMargin( 0.14);
     c->Update();
     c->SaveAs( TString::Format("%s", h2_prot_theta_phi_save_path.c_str()));
-
+/*
     // draw the phi histogram and save it as a PDF file
     h1_prot_phi->Draw("hist");
     c->SetLeftMargin( 0.14);
@@ -109,7 +109,7 @@ void prot_phiAndTheta_plot( std::string file_name){
     c->SetBottomMargin(	0.14);
     c->Update();
     c->SaveAs( TString::Format("%s", h1_prot_theta_save_path.c_str()));
-
+*/
     // smithja: this section of code integrates the distributions and prints
     //          it to the screen
     int num_events = h2_prot_theta_phi->Integral();

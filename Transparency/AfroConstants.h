@@ -30,7 +30,7 @@
 	const int Ndivisions = 6;
 	const int LineWidth = 3;
 	const int FontStyle = 132;
-	const double TextSize = 0.05;
+	const double TextSize = 0.07;
 	const int MarkerStyle = 20;
 	const int MarkerSize = 2.;
 	const double acc = 3.;
@@ -448,13 +448,13 @@
 	static std::map<std::pair<TString,TString>,double> RadUpdatedSchwingerSuSav2NumberEvents =
 	{
 
-		{ std::make_pair("4He", "2_261"), 30000000 }, // Q2 > 0.4
-		{ std::make_pair("4He", "4_461"), 30000000 }, // Q2 > 0.8
-		{ std::make_pair("12C", "1_161"), 30000000 }, // Q2 > 0.1
-		{ std::make_pair("12C", "2_261"), 30000000 }, // Q2 > 0.4
-		{ std::make_pair("12C", "4_461"), 30000000 }, // Q2 > 0.8
-		{ std::make_pair("56Fe", "2_261"), 30000000 }, // Q2 > 0.4
-		{ std::make_pair("56Fe", "4_461"), 30000000 } // Q2 > 0.8
+		{ std::make_pair("4He", "2_261"), 42900000 }, // Q2 > 0.4
+		{ std::make_pair("4He", "4_461"), 44700000 }, // Q2 > 0.8
+		{ std::make_pair("12C", "1_161"), 33500000 }, // Q2 > 0.1
+		{ std::make_pair("12C", "2_261"), 34100000 }, // Q2 > 0.4
+		{ std::make_pair("12C", "4_461"), 37700000 }, // Q2 > 0.8
+		{ std::make_pair("56Fe", "2_261"), 34500000 }, // Q2 > 0.4
+		{ std::make_pair("56Fe", "4_461"), 49900000 } // Q2 > 0.8
 
 /*		{ std::make_pair("4He", "2_261"), 81100000 }, // Q2 > 0.4*/
 /*		{ std::make_pair("4He", "4_461"), 92300000 }, // Q2 > 0.8*/
@@ -466,8 +466,6 @@
 	};
 
 	// No Rad SuSav2 GENIE number events 
-
-
 
 	static std::map<std::pair<TString,TString>,double> NoRadSuSav2NumberEvents =
 	{
@@ -485,12 +483,12 @@
 		{ std::make_pair("4He", "2_261"),  20000000 }, // Q2 > 0.4
 		{ std::make_pair("4He", "4_461"),  17700000 }, // Q2 > 0.8
 		{ std::make_pair("12C", "1_161"),  19800000 }, // Q2 > 0.1
-		{ std::make_pair("12C", "2_261"),  30000000 }, // Q2 > 0.4
-		{ std::make_pair("12C", "4_461"),  30000000 }, // Q2 > 0.8
-		//{ std::make_pair("56Fe", "2_261"), 167000000 }, // Q2 > 0.4
+		{ std::make_pair("12C", "2_261"),  174600000 }, // Q2 > 0.4
+		{ std::make_pair("12C", "4_461"),  164300000 }, // Q2 > 0.8
+		{ std::make_pair("56Fe", "2_261"), 167000000 }, // Q2 > 0.4
 		//{ std::make_pair("56Fe", "4_461"), 190600000 } // Q2 > 0.8
-		{ std::make_pair("56Fe", "2_261"), 20000000 },//small run
-		{ std::make_pair("56Fe", "4_461"), 20000000 } //small run
+		//{ std::make_pair("56Fe", "2_261"), 20000000 },//small run
+		{ std::make_pair("56Fe", "4_461"), 49900000 } //small run
 	};
 
 	// Rad SuSav2 GENIE number events 
@@ -601,14 +599,14 @@
 /*		{ std::make_pair("56Fe", "4_461"), 0 } // Q2 > 0.8*/
 
 //		{ std::make_pair("1H", "1_161"), 0 }, // Q2 > 0.1
-		{ std::make_pair("4He", "2_261"),  30000000 }, // Q2 > 0.4
-		{ std::make_pair("4He", "4_461"),  30000000 }, // Q2 > 0.8
-		{ std::make_pair("12C", "1_161"),  30000000 }, // Q2 > 0.1
-		{ std::make_pair("12C", "2_261"),  30000000 }, // Q2 > 0.4
-		{ std::make_pair("12C", "4_461"),  30000000 }, // Q2 > 0.8
-		{ std::make_pair("56Fe", "2_261"), 30000000 }, // Q2 > 0.4
+		{ std::make_pair("4He", "2_261"),  69000000 }, // Q2 > 0.4
+		{ std::make_pair("4He", "4_461"),  70400000 }, // Q2 > 0.8
+		{ std::make_pair("12C", "1_161"),  43900000 }, // Q2 > 0.1
+		{ std::make_pair("12C", "2_261"),  53200000 }, // Q2 > 0.4
+		{ std::make_pair("12C", "4_461"),  67900000 }, // Q2 > 0.8
+		{ std::make_pair("56Fe", "2_261"), 69600000 }, // Q2 > 0.4
 //		{ std::make_pair("56Fe", "4_461"), 49749540 } // Q2 > 0.8 // Feb 18
-		{ std::make_pair("56Fe", "4_461"), 30000000 } // Q2 > 0.8 // Default
+		{ std::make_pair("56Fe", "4_461"), 81100000 } // Q2 > 0.8 // Default
 //		{ std::make_pair("56Fe", "4_461"), 46500000 } // Q2 > 0.8
 
 	};
