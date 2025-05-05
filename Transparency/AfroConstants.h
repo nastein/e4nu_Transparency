@@ -259,8 +259,10 @@
 		{ "GTEST18_02d_NoRadCorr_LFGM_Truth_WithFidAcc", "GTEST18_02d NoRad" },
 
 		// ------------------------------------------------------------------------------------------------------
+		{ "Fortran_SF_NoRadCorr_hN2018_Truth_WithoutFidAcc", "Fortran SF hN NoRad" },
 
-
+		// -----------------------------------
+		{"SuSav2_NoRadCorr_CFG", "SuSav2 CFG NoRad"},
 
 	};
 
@@ -312,14 +314,11 @@
 		{ std::make_pair("4He", "2_261"), 1.16584 },
 		{ std::make_pair("4He", "4_461"), 0.97884 },
 		{ std::make_pair("12C", "1_161"), 0.079 },
-//		{ std::make_pair("CH2", "1_161"), 0.070707652 },
-
-//		{ std::make_pair("CH2", "1_161"), 0.0794 },
-		{ std::make_pair("CH2", "1_161"), 0.068 }, // L.W. Dec 17 2020
-
+		//{ std::make_pair("12C", "1_161"), 0.0613 },
 		{ std::make_pair("12C", "2_261"), 2.83649 },
-//		{ std::make_pair("12C", "2_261"), 0.007609864 },
 		{ std::make_pair("12C", "4_461"), 2.31146 },
+		//{ std::make_pair("12C", "2_261"), 1.79 },
+		//{ std::make_pair("12C", "4_461"), 2.84 },
 		{ std::make_pair("56Fe", "2_261"), 0.217238 },
 		{ std::make_pair("56Fe", "4_461"), 0.308581 }
 	};
@@ -491,6 +490,12 @@
 		{ std::make_pair("56Fe", "4_461"), 49900000 } //small run
 	};
 
+	static std::map<std::pair<TString,TString>, double> NoRadSuSAv2CFGhNNumberEvents = 
+	{
+		{ std::make_pair("12C", "2_261"), 300000 } // Q2 > 0.4
+
+	};
+
 	// Rad SuSav2 GENIE number events 
 
 	static std::map<std::pair<TString,TString>,double> SuSav2NumberEvents =
@@ -536,17 +541,24 @@
 		{ std::make_pair("56Fe", "4_461"), 0. } // Q2 > 0.8
 	};
 
-	static std::map<std::pair<TString, TString>,double> SFGenieXsec = {
-		{std::make_pair("12C", "1_161"), (1.90479e-03 + 1.25129e-02) * 3.8903109e+10},
-		{std::make_pair("12C", "2_261"), (2.71581e-04 + 8.35445e-04) * 3.8903109e+10}
 
-	};
-
-	static std::map<std::pair<TString, TString>,double> SFNumberEvents = {
-		{std::make_pair("12C", "1_161"), 19800000},
-                {std::make_pair("12C", "2_261"), 20000000}
-
+	static std::map<std::pair<TString,TString>,double> FortranSFhNGenieXSec =
+        {
+                { std::make_pair("12C", "1_161"), 4.5816825e+08}, // Q2 > 0.1
+                { std::make_pair("12C", "2_261"), 3.64031e+07}, // Q2 > 0.4
         };
+
+        static std::map<std::pair<TString,TString>,double> NoRadFortranSFhNNumberEvents =
+        {
+                { std::make_pair("12C", "1_161"),  4200000. }, // Q2 > 0.1
+                { std::make_pair("12C", "2_261"),  4200000. }, // Q2 > 0.4
+        };
+
+
+        static std::map<std::pair<TString,TString>,double> SuSAv2hNCFGGenieXsec = 
+	{
+		{ std::make_pair("12C", "2_261"), 2.491e+07}
+	};
 
 	// Rad G2018 GENIE number events 
 
@@ -602,8 +614,8 @@
 		{ std::make_pair("4He", "2_261"),  69000000 }, // Q2 > 0.4
 		{ std::make_pair("4He", "4_461"),  70400000 }, // Q2 > 0.8
 		{ std::make_pair("12C", "1_161"),  43900000 }, // Q2 > 0.1
-		{ std::make_pair("12C", "2_261"),  53200000 }, // Q2 > 0.4
-		{ std::make_pair("12C", "4_461"),  67900000 }, // Q2 > 0.8
+		{ std::make_pair("12C", "2_261"),  59100000 }, // Q2 > 0.4
+		{ std::make_pair("12C", "4_461"),  52800000 }, // Q2 > 0.8
 		{ std::make_pair("56Fe", "2_261"), 69600000 }, // Q2 > 0.4
 //		{ std::make_pair("56Fe", "4_461"), 49749540 } // Q2 > 0.8 // Feb 18
 		{ std::make_pair("56Fe", "4_461"), 81100000 } // Q2 > 0.8 // Default

@@ -125,8 +125,10 @@ void genie_analysis::Loop() {
 	if (fChain == 0) return;
 
 	Long64_t nentries = fChain->GetEntriesFast();
-	//nentries = 100000000; // smithja: max for C-12 simulation to not crash
+	//nentries = 10000000; // smithja: max for C-12 simulation to not crash
 	//nentries = 50000000;
+
+	//std::cout << "Analyzing file: " << fChain->GetCurrentFile()->GetName() << "\n";
 
 	if (nentries < fChain->GetEntriesFast()) { 
 		std::cout << "NENTRIES IS LESS THAN THE ACTUAL NUMBER OF EVENTS IN THIS FILE!!!" << "\n";
@@ -810,7 +812,7 @@ void genie_analysis::Loop() {
 				//          the Q4 dependence in these weights, simply comment out this instance of Q4 and uncomment
 				//          the original one directly above.
 //		double Mott_cross_sec = (1./Q4) * XSecScale;
-		double Mott_cross_sec = 1; // smithja: this is the weight Dr. Betancourt said to do away with from Graham's analysis.
+		double Mott_cross_sec = 1.;///reco_Q2/reco_Q2; // smithja: this is the weight Dr. Betancourt said to do away with from Graham's analysis.
 					   //          the object of setting this to 1 is to remove the Q4 dependence from the
 					   //          Mott cross section. You can see that XSecScale is also part of the instance of
 					   //          Mott_cross_sec directly above. However, when I received this script, XSecScale

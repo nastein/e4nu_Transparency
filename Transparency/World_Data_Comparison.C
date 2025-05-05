@@ -17,10 +17,40 @@ void other_data() {
 	//TFile *myC_SF = TFile::Open("T_C12_SF.root");
 
 	//TGraphErrors *C_g_SF = (TGraphErrors*)myC_SF->Get("Data_C12_SF");
-	TGraphErrors *C_g = (TGraphErrors*)myC->Get("data_C12");
-	TGraphErrors *F_g = (TGraphErrors*)myF->Get("data_Fe56");
+	//TGraphErrors *C_g = (TGraphErrors*)myC->Get("data_C12");
+	//TGraphErrors *F_g = (TGraphErrors*)myF->Get("data_Fe56");
 	TGraphErrors *H_g = (TGraphErrors*)myH->Get("data_He4");
-	F_g->RemovePoint(3);
+	//F_g->RemovePoint(3);
+	
+
+
+	double src_corr_err = .02;
+
+	double Carbon_x[] = {.70588, .9864, 1.30317, 1.6425};
+   	 double Carbon_xerr[] = {0,0,0,0};
+    	double Carbon_y[] = {.57923, .61639, .57377, .58251};
+   	 double Carbon_yerr[] = {.58798 - .57293, .628415 - .61639, .58251 - .57377, .6306 - .58251};
+    	double Carbon_src_corr[] = {.06,.03,.03,.03};
+
+   	 for(int i = 0; i < 4; i++) {
+    		Carbon_src_corr[i] = Carbon_src_corr[i]*Carbon_y[i];
+    		Carbon_yerr[i] = sqrt(pow(Carbon_yerr[i],2) + pow(src_corr_err*Carbon_y[i],2));
+    		Carbon_y[i] = Carbon_y[i] + Carbon_src_corr[i];
+    	}
+
+	double Fe_x[] = {.7013, .9866, 1.302};
+    double Fe_xerr[] = {0,0,0};
+    double Fe_y[] = {.4119, .3926, .43807};
+    double Fe_yerr[] = {.43125 - .4119, .42614 - .3926, .52045- .43807};
+    double Fe_src_corr[] = {.066,.033,.033};
+    
+    for(int i = 0; i < 3; i++) {
+    	Fe_src_corr[i] = Fe_src_corr[i]*Fe_y[i];
+    	Fe_yerr[i] = sqrt(pow(Fe_yerr[i],2) + pow(src_corr_err*Fe_y[i],2));
+    	Fe_y[i] = Fe_y[i] + Fe_src_corr[i];
+    }
+	TGraphErrors *C_g = new TGraphErrors(4, Carbon_x, Carbon_y, Carbon_xerr, Carbon_yerr);
+	TGraphErrors *F_g = new TGraphErrors(3, Fe_x, Fe_y, Fe_xerr, Fe_yerr);
 
 	double p5_err[5] = {0.,0.,0.,0.,0.};
 	double p4_err[4] = {0.,0.,0.,0.};
@@ -62,135 +92,115 @@ void other_data() {
 	double Foneill_p[4] = {mom(.582),mom(1.678),mom(2.722),mom(3.641)};
 	TGraphErrors *F_oneill_g = new TGraphErrors(4, Foneill_p, Foneill, p4_err, Foneill_err);
 
-	TCanvas *c1 = new TCanvas("1","1",1200,1000);
-	c1->SetLeftMargin(0.2);
-	c1->SetBottomMargin(0.2);
-//	c1->SetRightMargin(0.2);
+
+	double FGarrow[3] = {.394, .454, .391};
+        double FGarrow_err[3] = {.012, .023, .015};
+ 	double FGarrow_p[3] = {mom(1.76), mom(3.263), mom(4.293)};
+	TGraphErrors *F_Garrow_g = new TGraphErrors(3, FGarrow_p, FGarrow, p_err3, FGarrow_err);
 
 
 	C_g->SetMarkerColor(kBlack);
-	C_g->SetMarkerSize(1.5);
+	C_g->SetMarkerSize(2.5);
+	PrettyGraph(C_g);
 	C_g->GetYaxis()->SetRangeUser(0,1.0);
 	C_g->GetXaxis()->SetTitle("Proton Momentum (GeV)");
 	C_g->GetYaxis()->SetTitle("Transparency");
-	PrettyGraph(C_g);
 	C_g->SetTitle("CLAS6-C12");
    	TAxis *axis = C_g->GetXaxis();
-   	axis->SetLimits(0.01,5.);
+   	axis->SetLimits(0.25,3.);
    	C_g->SetMarkerStyle(20);
-   	C_g->SetMarkerSize(1.5); 
-   	C_g->SetMarkerColor(kBlue);
-	C_g->Draw("AP");
+   	C_g->SetMarkerSize(2.8); 
+   	C_g->SetMarkerColor(kBlack);
 	C_oneill_g->SetMarkerColor(kBlue);
 	C_oneill_g->SetTitle("Oneil-C12");
-	C_oneill_g->SetMarkerStyle(21);
-	C_oneill_g->SetMarkerSize(1.5);
-	C_oneill_g->Draw("P");
+	C_oneill_g->SetMarkerStyle(25);
+	C_oneill_g->SetMarkerSize(2.0);
 	C_dutta_g->SetMarkerColor(kBlue);
 	C_dutta_g->SetTitle("Dutta-C12");
-	C_dutta_g->SetMarkerStyle(22);
-	C_dutta_g->SetMarkerSize(1.5);
-	C_dutta_g->Draw("P");
+	C_dutta_g->SetMarkerStyle(26);
+	C_dutta_g->SetMarkerSize(2.0);
 	C_rohe_g->SetMarkerColor(kBlue);
 	C_rohe_g->SetTitle("Rohe-C12");
-	C_rohe_g->SetMarkerStyle(33);
-	C_rohe_g->SetMarkerSize(1.5);
-	C_rohe_g->Draw("P");
+	C_rohe_g->SetMarkerStyle(38);
+	C_rohe_g->SetMarkerSize(2.0);
 	C_Garrow_g->SetTitle("Garrow-C12");
-	C_Garrow_g->SetMarkerStyle(29);
-	C_Garrow_g->SetMarkerSize(1.5);
+	C_Garrow_g->SetMarkerStyle(32);
+	C_Garrow_g->SetMarkerSize(2.0);
 	C_Garrow_g->SetMarkerColor(kBlue);
-	C_Garrow_g->Draw("P");
 	C_Garino_g->SetTitle("Garino-C12");
-	C_Garino_g->SetMarkerStyle(34);
-	C_Garino_g->SetMarkerSize(1.5);
+	C_Garino_g->SetMarkerStyle(46);
+	C_Garino_g->SetMarkerSize(2.0);
 	C_Garino_g->SetMarkerColor(kBlue);
-	C_Garino_g->Draw("P");
-	
+
 	F_g->SetMarkerColor(kBlack);
-	F_g->SetMarkerSize(1.5);
-	F_g->GetYaxis()->SetRangeUser(0,0.7);
+	F_g->SetMarkerSize(2.7);
+	F_g->GetYaxis()->SetRangeUser(0,1.0);
 	PrettyGraph(F_g);
 	F_g->GetXaxis()->SetTitle("Proton Momentum (GeV)");
 	F_g->GetYaxis()->SetTitle("Transparency");
 	F_g->SetMarkerStyle(20);
 	F_g->SetMarkerColor(kBlack);
 	F_g->SetTitle("CLAS6-Fe56");
-   	
-	F_g->Draw("P");
-	F_oneill_g->SetMarkerColor(kBlack);
+   	F_g->SetMarkerSize(2.7);
+	F_oneill_g->SetMarkerColor(kBlue);
 	F_oneill_g->SetTitle("Oneil-Fe56");
-	F_oneill_g->SetMarkerStyle(21);
-	F_oneill_g->SetMarkerSize(1.5);
-	F_oneill_g->Draw("P");
-	F_dutta_g->SetMarkerColor(kBlack);
+	F_oneill_g->SetMarkerStyle(25);
+	F_oneill_g->SetMarkerSize(2.0);
+	F_dutta_g->SetMarkerColor(kBlue);
 	F_dutta_g->SetTitle("Dutta-Fe56");
-	F_dutta_g->SetMarkerStyle(22);
-	F_dutta_g->SetMarkerSize(1.5);
-	F_dutta_g->Draw("P");
-
-	H_g->SetMarkerColor(kRed);
-	H_g->SetMarkerSize(1.5);
-	H_g->SetMarkerStyle(20);
-	H_g->Draw("P");
-
-	TLegend *leg = new TLegend(0.25,0.22,0.65,0.43);
-	leg->SetBorderSize(0);
-	leg->SetNColumns(3);
-	leg->AddEntry(C_g, "C This Work", "p");
-	leg->AddEntry(C_Garino_g, "C MIT 1992", "p");
-	leg->AddEntry(C_oneill_g, "C SLAC 1995", "p");
-	leg->AddEntry(C_dutta_g, "C JLab 2003", "p");
-	leg->AddEntry(C_rohe_g, "C JLab 2005", "p");
-	leg->AddEntry(C_Garrow_g, "C JLab 2002", "p");
-	leg->AddEntry(F_g, "Fe This Work", "p");
-	leg->AddEntry(F_oneill_g, "Fe SLAC 1995", "p");
-	leg->AddEntry(F_dutta_g, "Fe JLab 2003", "p");
-	leg->AddEntry(H_g, "He This Work", "p");
-	leg->Draw();
-	c1->SaveAs("World_Data.pdf");	
+	F_dutta_g->SetMarkerStyle(26);
+	F_dutta_g->SetMarkerSize(2.0);
+	F_Garrow_g->SetMarkerColor(kBlue);
+	F_Garrow_g->SetTitle("Garrow-Fe56");
+	F_Garrow_g->SetMarkerStyle(32);
+	F_Garrow_g->SetMarkerSize(2.0);
 
 	TCanvas *c2 = new TCanvas("2","2",1200,1000);
 	c2->SetLeftMargin(0.2);
 	c2->SetBottomMargin(0.2);
+	
+	TAxis *ggaxis = C_oneill_g->GetXaxis();
+        ggaxis->SetLimits(0.5,3.);
 
 	C_g->Draw("AP");
-	C_oneill_g->Draw("P");
 	C_dutta_g->Draw("P");
-	C_rohe_g->Draw("P");
 	C_Garrow_g->Draw("P");
 	C_Garino_g->Draw("P");
+	C_oneill_g->Draw("P");
+	C_rohe_g->Draw("P");
 
-	TLegend *legC = new TLegend(0.25,0.22,0.65,0.43);
+	TLegend *legC = new TLegend(0.25,0.21,0.8,0.5);
 	legC->SetBorderSize(0);
-	legC->SetNColumns(3);
+	//legC->SetNColumns(3);
 	legC->AddEntry(C_g, "This Work", "p");
 	legC->AddEntry(C_Garino_g, "MIT 1992", "p");
 	legC->AddEntry(C_oneill_g, "SLAC 1995", "p");
 	legC->AddEntry(C_dutta_g, "JLab 2003", "p");
-	legC->AddEntry(C_rohe_g, "JLab 2005", "p");
 	legC->AddEntry(C_Garrow_g, "JLab 2002", "p");
+	legC->AddEntry(C_rohe_g, "JLab 2005", "p");
 	legC->Draw();
-	c2->SaveAs("World_Data_C.pdf");	
+//	c2->SaveAs("World_Data_C.pdf");	
 
 	TCanvas *c3 = new TCanvas("3","3",1200,1000);
 	c3->SetLeftMargin(0.2);
 	c3->SetBottomMargin(0.2);
 
    	TAxis *axisF = F_g->GetXaxis();
-   	axisF->SetLimits(0.01,5.);
+   	axisF->SetLimits(0.01,5.5);
 	F_g->Draw("AP");
 	F_oneill_g->Draw("P");
 	F_dutta_g->Draw("P");
+	F_Garrow_g->Draw("P");
 
-	TLegend *legF = new TLegend(0.25,0.22,0.65,0.43);
+	TLegend *legF = new TLegend(0.45,0.2,0.8,0.45);
 	legF->SetBorderSize(0);
-	legF->SetNColumns(3);
+	//legF->SetNColumns(3);
 	legF->AddEntry(F_g, "This Work", "p");
 	legF->AddEntry(F_oneill_g, "SLAC 1995", "p");
 	legF->AddEntry(F_dutta_g, "JLab 2003", "p");
+	legF->AddEntry(F_Garrow_g, "JLab 2002", "p");
 	legF->Draw();
-	c3->SaveAs("World_Data_Fe.pdf");
+//	c3->SaveAs("World_Data_Fe.pdf");
 
 
 }

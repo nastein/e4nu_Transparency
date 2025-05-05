@@ -116,8 +116,8 @@ void h1_el_theta_data_mc( std::string sim, std::string targ, std::string beamen,
     TCanvas* c;
     c = new TCanvas(TString::Format("c"), TString::Format("c"), 1200, 1000);
 
-    PrettyDoubleXSecPlot(h1_theta_el_mc, 2, beam_energy, 4, false);
-    //PrettyDoubleXSecPlot(h1_theta_el_data, 2, beam_energy, 4, false);
+    //PrettyDoubleXSecPlot(h1_theta_el_mc, 2, beam_energy, 4, false);
+    PrettyDoubleXSecPlot(h1_theta_el_data, 2, beam_energy, 4, false);
     // format the histograms
     h1_theta_el_data->Sumw2();
     h1_theta_el_data->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
@@ -130,12 +130,13 @@ void h1_el_theta_data_mc( std::string sim, std::string targ, std::string beamen,
     h1_theta_el_data->SetMarkerSize(1.5);
     h1_theta_el_data->SetMarkerColor(kBlack);
     
-    h1_theta_el_mc->SetLineColor(kBlack);
-    h1_theta_el_mc->GetXaxis()->SetRangeUser(10.,60.);
-    h1_theta_el_mc->GetXaxis()->SetTitle("Electron Scattering Angle (Degrees)");
-    double max = 1.1*h1_theta_el_mc->GetMaximum();
-    h1_theta_el_mc->GetYaxis()->SetRangeUser(0., max);
-    h1_theta_el_mc->Draw("HIST E");
+    h1_theta_el_data->SetLineColor(kBlack);
+    h1_theta_el_data->GetXaxis()->SetRangeUser(10.,60.);
+    h1_theta_el_data->GetXaxis()->SetTitle("Electron Scattering Angle (Degrees)");
+    //h1_theta_el_data->GetYaxis()->SetTitle("Scaled Number of Events");
+    double max = 1.1*h1_theta_el_data->GetMaximum();
+    h1_theta_el_data->GetYaxis()->SetRangeUser(0., max);
+    //h1_theta_el_mc->Draw("HIST E");
     h1_theta_el_data->Draw("E P SAME");
 
 
@@ -163,8 +164,8 @@ void h1_el_theta_data_mc( std::string sim, std::string targ, std::string beamen,
         }
     
     // draw a legend for our plot
-    TLegend *legend = new TLegend( .82,.65,.99,.85);
-    legend->AddEntry( h1_theta_el_mc, "SuSAv2");
+    TLegend *legend = new TLegend( .60,.55,.79,.9);
+    //legend->AddEntry( h1_theta_el_mc, "SuSAv2");
     legend->AddEntry( h1_theta_el_data, "CLAS data");
     legend->SetBorderSize( 0);
     legend->SetFillStyle( 0);

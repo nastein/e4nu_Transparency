@@ -32,10 +32,11 @@
 #include <stdio.h>
 //#include "myFunctions.cpp"
 #include "parse_file.C"
-#include "../Analyze_data/myFunctions.cpp"
+#include "../Transparency/myFunctions.h"
 
 void h1_phidiff_data_mc(std::string sim, std::string targ, std::string beamen, std::string range, std::string type){
-
+	
+   gStyle->SetOptTitle(0);
         // declare variables that will be used in the plotting/formatting of histograms and file names
     std::string info1 ("");
     std::string cuts1 ("");
@@ -56,8 +57,8 @@ void h1_phidiff_data_mc(std::string sim, std::string targ, std::string beamen, s
     if(targ == "4He") flipped_target = "He4";
     if(targ == "C12") flipped_target = "C12";
 
-    file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/Third_Try/"+sim+"/"+type+"_Range"+range+"_Genie_"+sim_num+"_"+targ+"_"+beamen+".root";
-    file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_Sample3/"+flipped_target+"/"+type+"_Range"+range+"_Data__"+targ+"_"+beamen+".root";
+    file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/ThetaPQCut_nominal/"+sim+"/Excl_Range"+range+"_Genie_"+sim_num+"_"+targ+"_"+beamen+".root";
+    file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Data_ThetaPQ/"+flipped_target+"/Excl_Range"+range+"_Data__"+targ+"_"+beamen+".root";
 
     //file_name2= "/genie/app/users/nsteinbe/grahams_e4nu/Cut_BreakDown/elec_momData__56Fe_4.461000.root";
     //file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/Cut_BreakDown/elec_momGenie_1_56Fe_4.461000.root";
@@ -108,7 +109,7 @@ void h1_phidiff_data_mc(std::string sim, std::string targ, std::string beamen, s
 
 
     UniversalE4vFunction(h1_phidiff_mc,  sim_label, target, beam_en, TString(info1)+TString(cuts1));
-    UniversalE4vFunction(h1_phidiff_data,  "Pinned Data", target, beam_en, TString(info2));
+    UniversalE4vFunction(h1_phidiff_data,  "Data", target, beam_en, TString(info2));
     
 
     // create a canvas on which to draw the histograms
@@ -119,24 +120,41 @@ void h1_phidiff_data_mc(std::string sim, std::string targ, std::string beamen, s
 
     TCanvas* c3;
     c3 = new TCanvas(TString::Format("c3"), TString::Format("c3"), 1000, 1000);
-    c3->SetLogy();
+    
+    c3->SetLeftMargin( 0.2);
+    c3->SetBottomMargin( 0.2);
+    c3->SetRightMargin( 0.2);
+    c3->Update();
+
+     c3->SetLogy();
     // format the histograms
     h1_phidiff_data->Sumw2();
-    h1_phidiff_data->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
+  
+    PrettyDoubleXSecPlot(h1_phidiff_data, 2, 2.261000, 4, false);
+
+     h1_phidiff_data->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
     h1_phidiff_data->GetXaxis()->SetTitle("#phi_{e} - #phi_{p} (degrees)");
-    h1_phidiff_data->GetYaxis()->SetTitle("Events");
-    h1_phidiff_data->GetXaxis()->CenterTitle( true);
-    h1_phidiff_data->GetYaxis()->CenterTitle( true);
-    h1_phidiff_data->SetTitle(TString(info2)+TString(cuts2));
-    h1_phidiff_data->SetMarkerStyle(2);
+    //h1_phidiff_data->GetYaxis()->SetTitle("Events");
+    //h1_phidiff_data->GetXaxis()->CenterTitle( true);
+    //h1_phidiff_data->GetYaxis()->CenterTitle( true);
+    //h1_phidiff_data->SetTitle(TString(info2)+TString(cuts2));
+    //h1_phidiff_data->SetMarkerStyle(2);
+    //h1_phidiff_data->SetMarkerColor(kBlack);
+    h1_phidiff_data->SetMarkerStyle(kFullCircle);
+    h1_phidiff_data->SetMarkerSize(1.5);
     h1_phidiff_data->SetMarkerColor(kBlack);
-    h1_phidiff_data->GetYaxis()->SetRangeUser(0.00000001,max);
+
+    h1_phidiff_data->GetYaxis()->SetRangeUser(0.0000001,max);
 
     gStyle->SetOptStat(0);
     h1_phidiff_mc->SetLineColor(kBlack);
     h1_phidiff_mc->GetYaxis()->SetRangeUser(0.00000001, max);
-    h1_phidiff_data->Draw("HIST E");
-    h1_phidiff_mc->Draw("HIST SAME"); 
+    h1_phidiff_data->Draw(" E P");
+    h1_phidiff_data->GetXaxis()->SetRangeUser(0,360.);
+
+   
+
+   h1_phidiff_mc->Draw("HIST SAME"); 
 
     // draw a legend for our plot
     TLegend *legend = new TLegend( 0.6, 0.625, 0.825, 0.875);
@@ -148,9 +166,9 @@ void h1_phidiff_data_mc(std::string sim, std::string targ, std::string beamen, s
 
 
     // crop the margins of the canvas
-    c3->SetLeftMargin( 0.14);
-    c3->SetBottomMargin( 0.14);
-    c3->Update();
-
+    //c3->SetLeftMargin( 0.14);
+    //c3->SetBottomMargin( 0.14);
+    //c3->Update();
+    c3->SaveAs("phi_difference_C12_2.261_Range2.pdf");
     
 }

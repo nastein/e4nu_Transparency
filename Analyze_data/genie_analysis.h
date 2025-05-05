@@ -456,9 +456,9 @@ genie_analysis::genie_analysis(std::string a_filename, std::string a_target, std
     //if((a_protMom_lb + a_protMom_ub) > 0 && a_protMom_lb < a_protMom_ub) {
        //testing effect of proton momentum cut on missing energy and momentum distributions
         t_ProtMom_lb->SetVal(0); t_ProtMom_ub->SetVal(99999);
-        // t_ProtMom_lb->SetVal(0.8);
+        //t_ProtMom_lb->SetVal(0.5);
         fApplyProtMomCut = false;
-    //}
+   // }
 
     fAllSectors = a_AllSectors;
     fFiducials = a_Fiducials;
@@ -503,10 +503,13 @@ genie_analysis::genie_analysis(std::string a_filename, std::string a_target, std
 	}
 
       if (fchoice == 1) { 
-
+		//std::cout << "What is going on" << "\n";
       		// Non radiative SuSav2
-		chain->Add(Form("/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/%s_%sGeV/apapadop_SuSav2_%s_%sGeV_master.root", ftarget.c_str(),fbeam_en.c_str(),ftarget.c_str(),fbeam_en.c_str()));
-		
+		//chain->Add(Form("/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/%s_%sGeV/apapadop_SuSav2_%s_%sGeV_master.root", ftarget.c_str(),fbeam_en.c_str(),ftarget.c_str(),fbeam_en.c_str()));
+
+		//Testing SuSAv2 (hA) with CFG
+		chain->Add("/pnfs/genie/persistent/users/jtenavid/e4nu_files/GENIE_Files/2024Generation/GEM21_11a_Dipole_CFG_Q2_04_2GeV_eCarbon.gst.root");
+		//chain->Add("/pnfs/genie/scratch/users/nsteinbe/eGENIE_grid/e4v/2261/C12_SF_hN/EmQ2_04-routine_validation_01-eScattering/e4v_2261_hN_SF.gst.root");
       		// Ext Radiation SuSav2
 //		  chain->Add(Form("/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/%s_%sGeV/apapadop_Rad_SuSav2_%s_%sGeV.root", ftarget.c_str(),fbeam_en.c_str(),ftarget.c_str(),fbeam_en.c_str()));  
 
@@ -519,9 +522,28 @@ genie_analysis::genie_analysis(std::string a_filename, std::string a_target, std
 
       if (fchoice == 2) { 
       
+		//std::cout << ((a_beam_en.compare("4461") == 0) && (ftarget.compare("C12") == 0)) << "\n";
+
       		// Non Radiative G2018
 	
-		chain->Add(Form("/pnfs/genie/persistent/users/apapadop/e4v_G2018/Exclusive/electrons/%s_%sGeV/apapadop_G2018_%s_%sGeV_master*.root", ftarget.c_str(),fbeam_en.c_str(),ftarget.c_str(),fbeam_en.c_str()));
+		if((a_beam_en.compare("2261") == 0) && (ftarget.compare("C12") == 0)) {
+			std::cout << "did we make it in?" << "\n";
+			chain->Add("/pnfs/genie/scratch/users/nsteinbe/eGENIE_grid/e4v/2261/C12_G2018/master_Q2_0_4-routine_validation_01-eScattering/nsteinbe_G2018_C12_2261GeV_master.root");
+		//adding G18 C12 2 GeV file with no FSI
+		//chain->Add("/pnfs/genie/persistent/users/jtenavid/e4nu_files/GENIE_Files/EventGeneration/G18_10a_00_000/G18_10a_Q2_04_NoFSI_e_on_1000060120_2261MeV_NoRad.gst.root");
+		}
+
+		else if((a_beam_en.compare("4461") == 0) && (ftarget.compare("C12") == 0)) {
+			std::cout << "did we make it in?" << "\n";
+			chain->Add("/pnfs/genie/scratch/users/nsteinbe/eGENIE_grid/e4v/4461/C12_G2018/master_Q2_0_8-routine_validation_01-eScattering/nsteinbe_G2018_C12_4461GeV_master.root");
+		}
+
+		else {
+			std::cout << "What is going on" << "\n";
+			chain->Add(Form("/pnfs/genie/persistent/users/apapadop/e4v_G2018/Exclusive/electrons/%s_%sGeV/apapadop_G2018_%s_%sGeV_master*.root", ftarget.c_str(),fbeam_en.c_str(),ftarget.c_str(),fbeam_en.c_str()));
+		}
+
+		
 		//chain->Add("/pnfs/genie/scratch/users/nsteinbe/eGENIE_grid/C12_1161_Q2cut_FSIoff.gst.root");
 		//chain->Add("/pnfs/genie/scratch/users/nsteinbe/eGENIE_grid/C12_2261_Q2cut_FSIoff2.gst.root");
 

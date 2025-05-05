@@ -62,13 +62,15 @@ void h1_ThetaPQ_data_mc( std::string sim, std::string targ, std::string beamen, 
     else if(range == "2") r = 1;
     else r = 2;
  
-    //file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/Cut_BreakDown/ThetaPQ/ThetaPQ_Range"+range+"_Genie_"+sim_num+"_"+targ+"_"+beamen+".root";
-    //file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/Cut_BreakDown/ThetaPQ/ThetaPQ_Range"+range+"_Data__"+targ+"_"+beamen+".root";
+    file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/Cut_BreakDown/ThetaPQ/ThetaPQ_Range"+range+"_Genie_"+sim_num+"_"+targ+"_"+beamen+".root";
+    file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/Cut_BreakDown/ThetaPQ/ThetaPQ_Range"+range+"_Data__"+targ+"_"+beamen+".root";
     
-    if(sim == "SuSAv2") file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/ThetaPQCut/"+sim+"/"+type+"_Range"+range+"_Genie_"+sim_num+"_"+targ+"_"+beamen+".root";
-    file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_SampleThetaPQ/"+flipped_target+"/"+type+"_Range"+range+"_Data__"+targ+"_"+beamen+".root";
+   // if(sim == "SuSAv2") file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/ThetaPQCut/"+sim+"/"+type+"_Range"+range+"_Genie_"+sim_num+"_"+targ+"_"+beamen+".root";
+   // file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Full_Data_SampleThetaPQ/"+flipped_target+"/"+type+"_Range"+range+"_Data__"+targ+"_"+beamen+".root";
 
-    
+   //file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/ThetaPQCut_nominal/SuSAv2/Excl_Range"+range+"_Genie_1_"+targ+"_"+beamen+".root";
+   //file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Data_ThetaPQ/C12/Excl_Range"+range+"_Data__"+targ+"_"+beamen+".root";    
+
     TFile *input1 = TFile::Open( TString(file_name1));
     TFile *input2 = TFile::Open( TString(file_name2));
 
@@ -84,16 +86,75 @@ void h1_ThetaPQ_data_mc( std::string sim, std::string targ, std::string beamen, 
     info2 = parse2[0];
     cuts2 = parse2[1];
 
+   std::vector<int> sectors = {};
+
     std::string beam_en;
     double beam_en_dbl;
     if(info1.find("1.161")!= std::string::npos) {beam_en = "1_161"; beam_en_dbl = 1.161;}
     else if(info1.find("2.261")!= std::string::npos) {beam_en = "2_261"; beam_en_dbl = 2.261;}
     else {beam_en = "4_461"; beam_en_dbl = 4.461;}
 
+    double scale_factor=0;
     std::string target;
-    if(info1.find("C12")!= std::string::npos) {target = "12C";}
-    else if(info1.find("4He")!= std::string::npos) {target = "4He";}
-    else {target = "56Fe";}
+            if(info1.find("C12")!= std::string::npos) {target = "12C";
+        if (beam_en == "2_261") {
+           if (range == "1") {
+                sectors.push_back(2); sectors.push_back(3); sectors.push_back(4);
+		 scale_factor = 0.759/0.5;
+           }
+           if (range == "2") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(3); sectors.push_back(4); sectors.push_back(5);
+                scale_factor = .720/0.5;
+           }
+           if (range == "3") {
+                sectors.push_back(0); sectors.push_back(3); sectors.push_back(5);
+                scale_factor = .685/0.5;
+           }
+
+        }
+        if (beam_en == "4_461") {sectors.push_back(1); sectors.push_back(3); sectors.push_back(4); scale_factor = 0.697/0.5;}
+
+    }
+    else if(info1.find("4He")!= std::string::npos) {target = "4He";
+        if (beam_en == "2_261") {
+           if (range == "1") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(3);
+                scale_factor = 0.755/0.5;
+           }
+           if (range == "2") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(3); sectors.push_back(5);
+                scale_factor = 0.708/0.5;
+           }
+           if (range == "3") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(3);
+                scale_factor = 0.690/0.5;
+           }
+
+        }
+        if (beam_en == "4_461") {sectors.push_back(2); sectors.push_back(3); sectors.push_back(4); scale_factor = 0.688/0.5;}
+
+
+    }
+    else {target = "56Fe";
+        if (beam_en == "2_261") {
+           if (range == "1") {
+                sectors.push_back(0); sectors.push_back(1); sectors.push_back(2); sectors.push_back(3); sectors.push_back(5);
+                scale_factor = 0.725/0.5;
+           }
+           if (range == "2") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(4); sectors.push_back(5);
+                scale_factor = 0.672/0.5;
+           }
+           if (range == "3") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(4); sectors.push_back(5);
+                scale_factor = 0.665/0.5;
+          }
+
+        }
+        if (beam_en == "4_461") {sectors.push_back(2); sectors.push_back(3); sectors.push_back(4); scale_factor = 0.629/0.5;}
+
+    }
+    
 
     std::cout << "Simulation: " << sim << "\n";
     std::cout << "Sim label: " << sim_label << "\n";
@@ -108,10 +169,11 @@ void h1_ThetaPQ_data_mc( std::string sim, std::string targ, std::string beamen, 
 
 
 	for (int i = 0; i < 4; i++) { // for all the interactions
-	    for (int j = 0; j < 6; j++) { // for all the sectors
+	    for (int j: sectors) { // for all the sectors
     		// extract the histrograms
-    		h1_ThetaPQ_InteractionBreakDown_inSector_mc[i][j] = (TH1D*)input1->Get(TString::Format("h1_Int%i_Sect_%i_ThetaPQ", i+1, j));    
-            if(j == 0) h1_ThetaPQ_mc_int[i] = (TH1D*)h1_ThetaPQ_InteractionBreakDown_inSector_mc[i][j]->Clone();
+    		h1_ThetaPQ_InteractionBreakDown_inSector_mc[i][j] = (TH1D*)input1->Get(TString::Format("h1_Int%i_Sect_%i_ThetaPQ", i+1, j));
+		if(i == 0) h1_ThetaPQ_InteractionBreakDown_inSector_mc[i][j]->Scale(scale_factor);    
+            if(j == sectors[0]) h1_ThetaPQ_mc_int[i] = (TH1D*)h1_ThetaPQ_InteractionBreakDown_inSector_mc[i][j]->Clone();
             else h1_ThetaPQ_mc_int[i]->Add(h1_ThetaPQ_InteractionBreakDown_inSector_mc[i][j]);
 	    
 	   }
@@ -122,13 +184,13 @@ void h1_ThetaPQ_data_mc( std::string sim, std::string targ, std::string beamen, 
     h1_ThetaPQ_mc_total->Add(h1_ThetaPQ_mc_int[2]);
     h1_ThetaPQ_mc_total->Add(h1_ThetaPQ_mc_int[3]);
     
-   for (int i = 0; i < 6; i++) { // for all the sectors
+   for (int i: sectors) { // for all the sectors
       h1_ThetaPQ_data[i] = (TH1D*)input2->Get( TString::Format("h1_Int0_Sect_%i_ThetaPQ", i));
    }
 
    // compile all the sectors into one histogram
-   for( int i = 1; i < 6; i++) { 
-       h1_ThetaPQ_data[0]->Add( h1_ThetaPQ_data[i]); 
+   for( int i: sectors) { 
+       if(i != sectors[0]) h1_ThetaPQ_data[sectors[0]]->Add( h1_ThetaPQ_data[i]); 
    }
 
 
@@ -138,7 +200,7 @@ void h1_ThetaPQ_data_mc( std::string sim, std::string targ, std::string beamen, 
         UniversalE4vFunction(h1_ThetaPQ_mc_int[i], sim_label, target, beam_en, TString(info1)+TString(cuts1));
         PrettyDoubleXSecPlot(h1_ThetaPQ_mc_int[i], 2, beam_en_dbl, 4, false);
     }
-   UniversalE4vFunction(h1_ThetaPQ_data[0],  "Pinned Data", target, beam_en, TString(info2));
+   UniversalE4vFunction(h1_ThetaPQ_data[sectors[0]],  "Pinned Data", target, beam_en, TString(info2));
    //PrettyDoubleXSecPlot(h1_ThetaPQ_data[0], 0, beam_en_dbl, r, false);
 
 
@@ -151,17 +213,17 @@ void h1_ThetaPQ_data_mc( std::string sim, std::string targ, std::string beamen, 
     TCanvas* c;
     c = new TCanvas(TString::Format("c"), TString::Format("c"), 1200, 1000);
     // format the histograms
-    h1_ThetaPQ_data[0]->Sumw2();
-    h1_ThetaPQ_data[0]->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
-    h1_ThetaPQ_mc_total->GetXaxis()->SetTitle("ThetaPQ (Degrees)");
-    h1_ThetaPQ_mc_total->GetYaxis()->SetTitle("Scaled Events");
+    h1_ThetaPQ_data[sectors[0]]->Sumw2();
+    h1_ThetaPQ_data[sectors[0]]->SetStats( 0); // get rid of the stats box that usually appears at the top right of plots
+    h1_ThetaPQ_mc_total->GetXaxis()->SetTitle("#theta_{PQ} (Degrees)");
+    h1_ThetaPQ_mc_total->GetYaxis()->SetTitle("Scaled Number of Events");
     h1_ThetaPQ_mc_total->SetTitle(TString(info2)+TString(cuts2));
 
-    h1_ThetaPQ_data[0]->SetMarkerStyle(kFullCircle);
-    h1_ThetaPQ_data[0]->SetMarkerSize(1.5);
-    h1_ThetaPQ_data[0]->SetMarkerColor(kBlack);
+    h1_ThetaPQ_data[sectors[0]]->SetMarkerStyle(kFullCircle);
+    h1_ThetaPQ_data[sectors[0]]->SetMarkerSize(1.5);
+    h1_ThetaPQ_data[sectors[0]]->SetMarkerColor(kBlack);
 
-    h1_ThetaPQ_data[0]->GetXaxis()->SetRangeUser(0,90);
+    h1_ThetaPQ_data[sectors[0]]->GetXaxis()->SetRangeUser(0,90);
 
 
     double max = 1.1*h1_ThetaPQ_mc_total->GetMaximum();
@@ -176,8 +238,8 @@ void h1_ThetaPQ_data_mc( std::string sim, std::string targ, std::string beamen, 
       h1_ThetaPQ_mc_int[i]->Draw("HIST SAME");
     }
 
-
-    h1_ThetaPQ_data[0]->Draw("P E SAME");
+    //h1_ThetaPQ_data[sectors[0]]->Scale(1.35);
+    h1_ThetaPQ_data[sectors[0]]->Draw("P E SAME");
     
     TLine *cut = new TLine(20., 0, 20., max);
     cut->SetLineColor(kRed);
@@ -185,12 +247,12 @@ void h1_ThetaPQ_data_mc( std::string sim, std::string targ, std::string beamen, 
     cut->Draw();
 
     // draw a legend for our plot
-    TLegend *legend = new TLegend(.82,.65,.99,.85);
+    TLegend *legend = new TLegend(.62,.60,.82,.90);
     legend->AddEntry( h1_ThetaPQ_mc_total, "SuSAv2");
     for(int i = 0; i < 4; i++) {
         legend->AddEntry(h1_ThetaPQ_mc_int[i], TString::Format("%s", interactions[i].c_str()));
     }
-    legend->AddEntry( h1_ThetaPQ_data[0], "CLAS data");
+    legend->AddEntry( h1_ThetaPQ_data[sectors[0]], "CLAS data");
     legend->SetBorderSize( 0);
     legend->SetFillStyle( 0);
     legend->Draw();
@@ -201,7 +263,7 @@ void h1_ThetaPQ_data_mc( std::string sim, std::string targ, std::string beamen, 
     c->SetRightMargin( 0.2);
     c->Update();
 
-    c->SaveAs(TString::Format("ThetaPQcut/ThetaPQcut_%s_%s_%s.pdf",targ.c_str(), beamen.c_str(), range.c_str()));
+    c->SaveAs(TString::Format("ThetaPQcut/8_9_ThetaPQcut_%s_%s_%s.pdf",targ.c_str(), beamen.c_str(), range.c_str()));
 
 
     

@@ -210,7 +210,7 @@ leg->AddEntry(He_G, "He");
 leg->AddEntry(Fe_G, "Fe");
 leg->Draw();
 leg->SetBorderSize(0);
-c1->SaveAs("Data_total_T.pdf");
+//c1->SaveAs("Data_total_T.pdf");
 
 TCanvas *c2 = new TCanvas("c2","c2",1200,1000);
 c2->SetLeftMargin(0.2);
@@ -235,7 +235,7 @@ leg2->AddEntry(SuSAHe_G, "He");
 leg2->AddEntry(SuSAFe_G, "Fe");
 leg2->SetBorderSize(0);
 leg2->Draw();
-c2->SaveAs("SuSA_total_T.pdf");
+//c2->SaveAs("SuSA_total_T.pdf");
 
 TCanvas *c3 = new TCanvas("c3","c3",1200,1000);
 c3->SetLeftMargin(0.2);
@@ -257,7 +257,7 @@ leg3->AddEntry(G18He_G, "He");
 leg3->AddEntry(G18Fe_G, "Fe");
 leg3->SetBorderSize(0);
 leg3->Draw();
-c3->SaveAs("G18_total_T.pdf");
+//c3->SaveAs("G18_total_T.pdf");
 
 std::vector<TGraphErrors*> He;
 He.push_back(He_G); He.push_back(SuSAHe_G); He.push_back(G18He_G);
@@ -355,7 +355,7 @@ c4->SetBottomMargin(.2);
 c4->SetRightMargin(.2);
 c4->Update();
 
-c4->SaveAs("A_dep.pdf");
+//c4->SaveAs("A_dep.pdf");
 
 
 

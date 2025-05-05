@@ -24,6 +24,7 @@
 #include <TPad.h>
 #include <TGaxis.h>
 
+#include "../Transparency/AfroConstants.h"
 #include <iostream>
 #include <vector>
 #include <stdio.h> // needed to sort array of bin values
@@ -87,8 +88,8 @@ void prot_bin_study_elTheta( std::string file_name){
     //          As a courtesey to others, I have documented value pairs for which 
     //          this program executes.
     // Form (rebin_factor_x, rebin_factor_y):
-    Int_t rebin_factor_x = 1;
-    Int_t rebin_factor_y = 50;
+    Int_t rebin_factor_x = 4;
+    Int_t rebin_factor_y = 60;
 
     std::string info ("");
     std::string cuts ("");
@@ -143,13 +144,26 @@ void prot_bin_study_elTheta( std::string file_name){
     // format the histograms
     h2_prot_mom_el_theta->SetStats( 0);
     h2_prot_mom_el_theta->GetXaxis()->SetRangeUser(theta_el_lb, theta_el_ub);
-    //h2_prot_mom_el_theta->GetYaxis()->SetRangeUser(protMom_lb, bin_bounds[N_BINS]);
-    h2_prot_mom_el_theta->GetZaxis()->SetRangeUser( 1, h2_prot_mom_el_theta->GetMaximum()); 
-    h2_prot_mom_el_theta->GetXaxis()->SetTitle("#theta_{electron} [deg]");
-    h2_prot_mom_el_theta->GetYaxis()->SetTitle("Proton Momentum [GeV]");
+    h2_prot_mom_el_theta->GetYaxis()->SetRangeUser(0.25, 2.5);
+    h2_prot_mom_el_theta->GetZaxis()->SetRangeUser( 0, h2_prot_mom_el_theta->GetMaximum()); 
+    h2_prot_mom_el_theta->GetXaxis()->SetTitle("Electron Scattering Angle (Degrees)");
+    h2_prot_mom_el_theta->GetYaxis()->SetTitle("Proton Momentum (GeV)");
     h2_prot_mom_el_theta->GetXaxis()->CenterTitle( true);
     h2_prot_mom_el_theta->GetYaxis()->CenterTitle( true);
-    h2_prot_mom_el_theta->SetTitle(TString(info)+TString(cuts));
+    //h2_prot_mom_el_theta->SetTitle(TString(info)+TString(cuts));
+
+    h2_prot_mom_el_theta->GetXaxis()->SetLabelFont(FontStyle);
+    h2_prot_mom_el_theta->GetXaxis()->SetTitleFont(FontStyle);
+    h2_prot_mom_el_theta->GetXaxis()->SetLabelSize(TextSize);
+    h2_prot_mom_el_theta->GetXaxis()->SetTitleSize(TextSize);
+    h2_prot_mom_el_theta->GetXaxis()->SetNdivisions(Ndivisions);
+
+     h2_prot_mom_el_theta->GetYaxis()->CenterTitle();
+         h2_prot_mom_el_theta->GetYaxis()->SetTitleSize(TextSize);
+ h2_prot_mom_el_theta->GetYaxis()->SetLabelSize(TextSize);
+  h2_prot_mom_el_theta->GetYaxis()->SetTitleFont(FontStyle);
+        h2_prot_mom_el_theta->GetYaxis()->SetLabelFont(FontStyle);
+         h2_prot_mom_el_theta->GetYaxis()->SetNdivisions(Ndivisions);
 
 
     for (int i = 0; i < N_BINS; i++) {
@@ -191,10 +205,9 @@ void prot_bin_study_elTheta( std::string file_name){
 
     // draw the histogram that does not separate the data into proton bands and save it as a PDF file
     h2_prot_mom_el_theta->Draw("colz");
-    c->SetLeftMargin( 0.14);
-    c->SetTopMargin( 0.16);
+    c->SetLeftMargin( 0.2);
     c->SetRightMargin( 0.14);
-    c->SetBottomMargin( 0.14);
+    c->SetBottomMargin( 0.2);
     c->SetLogz();
     c->Update();    
 

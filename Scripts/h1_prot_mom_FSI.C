@@ -65,8 +65,8 @@ void h1_prot_mom_FSI(std::string sim, std::string targ, std::string beamen, std:
     else if(range == "2") r = 1;
     else r = 2;
 
-    if(sim == "SuSAv2") file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/ThetaPQCut_Peshift/"+sim+"/Shift_Excl_Range"+range+"_Genie_"+sim_num+"_"+targ+"_"+beamen+".root";
-    file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Data_ThetaPQ_Peshift/"+flipped_target+"/Shifted_Excl_Range"+range+"_Data__"+targ+"_"+beamen+".root";
+    if(sim == "SuSAv2") file_name1 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/GENIE/Reconstructed/ThetaPQCut_nominal/"+sim+"/Excl_Range"+range+"_Genie_"+sim_num+"_"+targ+"_"+beamen+".root";
+    file_name2 = "/genie/app/users/nsteinbe/grahams_e4nu/CLAS/DATA/Data_ThetaPQ/"+flipped_target+"/Excl_Range"+range+"_Data__"+targ+"_"+beamen+".root";
 
     TFile *input1 = TFile::Open( TString(file_name1));
     TFile *input2 = TFile::Open( TString(file_name2));
@@ -89,10 +89,68 @@ void h1_prot_mom_FSI(std::string sim, std::string targ, std::string beamen, std:
     else if(info1.find("2.261")!= std::string::npos) {beam_en = "2_261"; beam_en_dbl = 2.261;}
     else {beam_en = "4_461"; beam_en_dbl = 4.461;}
 
+    std::vector<int> sectors = {};
+    double scale_factor=0;
     std::string target;
-    if(info1.find("C12")!= std::string::npos) {target = "12C";}
-    else if(info1.find("4He")!= std::string::npos) {target = "4He";}
-    else {target = "56Fe";}
+    if(info1.find("C12")!= std::string::npos) {target = "12C";
+        if (beam_en == "2_261") {
+           if (range == "1") {
+                sectors.push_back(2); sectors.push_back(3); sectors.push_back(4);
+                scale_factor = 0.759/0.5;
+           }
+           if (range == "2") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(3); sectors.push_back(4); sectors.push_back(5);
+                scale_factor = .720/0.5;
+           }
+           if (range == "3") {
+                sectors.push_back(0); sectors.push_back(3); sectors.push_back(5);
+                scale_factor = .685/0.5;
+           }
+
+        }
+        if (beam_en == "4_461") {sectors.push_back(1); sectors.push_back(3); sectors.push_back(4); scale_factor = 0.697/0.5;}
+
+    }
+    else if(info1.find("4He")!= std::string::npos) {target = "4He";
+        if (beam_en == "2_261") {
+           if (range == "1") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(3);
+                scale_factor = 0.755/0.5;
+           }
+           if (range == "2") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(3); sectors.push_back(5);
+                scale_factor = 0.708/0.5;
+           }
+           if (range == "3") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(3);
+                scale_factor = 0.690/0.5;
+           }
+
+        }
+        if (beam_en == "4_461") {sectors.push_back(2); sectors.push_back(3); sectors.push_back(4); scale_factor = 0.688/0.5;}
+
+
+    }
+    else {target = "56Fe";
+        if (beam_en == "2_261") {
+           if (range == "1") {
+                sectors.push_back(0); sectors.push_back(1); sectors.push_back(2); sectors.push_back(3); sectors.push_back(5);
+                scale_factor = 0.725/0.5;
+           }
+           if (range == "2") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(4); sectors.push_back(5);
+                scale_factor = 0.672/0.5;
+           }
+           if (range == "3") {
+                sectors.push_back(0); sectors.push_back(2); sectors.push_back(4); sectors.push_back(5);
+                scale_factor = 0.665/0.5;
+          }
+
+        }
+        if (beam_en == "4_461") {sectors.push_back(2); sectors.push_back(3); sectors.push_back(4); scale_factor = 0.629/0.5;}
+
+    }
+
 
     std::cout << "Simulation: " << sim << "\n";
     std::cout << "Sim label: " << sim_label << "\n";
@@ -108,9 +166,9 @@ void h1_prot_mom_FSI(std::string sim, std::string targ, std::string beamen, std:
     TH1D *h1_mom_mc_individual[3][6];
 
     for (int i = 0; i < 4; i++) { // for all the interactions
-        for (int j = 0; j < 6; j++) { // for all the sectors
+        for (int j: sectors) { // for all the sectors
             if(i == 0) {
-                if(j == 0) {
+                if(j == sectors[0]) {
                     h1_mom_mc_QE_noFSI = (TH1D*)(input1->Get(TString::Format("h1_InteractionEq1_NoQ4Weight_InSector%i_noFSI_prot_mom_QE",j))->Clone());
                     h1_mom_mc_QE_FSI = (TH1D*)(input1->Get(TString::Format("h1_InteractionEq1_NoQ4Weight_InSector%i_FSI_prot_mom_QE",j))->Clone());
                 }
@@ -122,7 +180,7 @@ void h1_prot_mom_FSI(std::string sim, std::string targ, std::string beamen, std:
 
             else {
                 h1_mom_mc_individual[i-1][j]= (TH1D*)input1->Get(TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom_QE__%i", i+1, j)); 
-                if(i==1 && j==0) {
+                if(i==1 && j==sectors[0]) {
                     h1_mom_mc_non_QE= (TH1D*)h1_mom_mc_individual[i-1][j]->Clone();
                 }  
                 else h1_mom_mc_non_QE->Add(h1_mom_mc_individual[i-1][j]);
@@ -135,19 +193,21 @@ void h1_prot_mom_FSI(std::string sim, std::string targ, std::string beamen, std:
     h1_mom_mc_QE_FSI->Rebin(40);
     h1_mom_mc_non_QE->Rebin(40);
 
-    h1_mom_mc_total = (TH1D*)(h1_mom_mc_QE_noFSI->Clone());
+    h1_mom_mc_QE_FSI->Scale(scale_factor);
+    h1_mom_mc_QE_noFSI->Scale(scale_factor);
+
+    h1_mom_mc_total = (TH1D*)(h1_mom_mc_non_QE->Clone());
     h1_mom_mc_total->Add(h1_mom_mc_QE_FSI);
-    h1_mom_mc_total->Add(h1_mom_mc_non_QE);
+    h1_mom_mc_total->Add(h1_mom_mc_QE_noFSI);
 
-
-    for (int i = 0; i < 6; i++) { // for all the sectors
+    for (int i: sectors) { // for all the sectors
         h1_mom_data[i] = (TH1D*)input2->Get( TString::Format("h1_0_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_prot_mom_QE__%i", i));
         h1_mom_data[i]->Rebin(40);
     }
 
     // compile all the sectors into one histogram
-    for( int i = 1; i < 6; i++) { 
-       h1_mom_data[0]->Add( h1_mom_data[i]); 
+    for( int i: sectors) { 
+       if(i != sectors[0]) h1_mom_data[sectors[0]]->Add( h1_mom_data[i]); 
     }
 
     UniversalE4vFunction(h1_mom_mc_total,  sim_label, target, beam_en, TString(info1)+TString(cuts1));
@@ -162,12 +222,12 @@ void h1_prot_mom_FSI(std::string sim, std::string targ, std::string beamen, std:
     UniversalE4vFunction(h1_mom_mc_non_QE, sim_label, target, beam_en, TString(info1)+TString(cuts1));
     PrettyDoubleXSecPlot(h1_mom_mc_non_QE, 0, beam_en_dbl, 4, false);
     
-    UniversalE4vFunction(h1_mom_data[0],  "Pinned Data", target, beam_en, TString(info2));
+    UniversalE4vFunction(h1_mom_data[sectors[0]],  "Pinned Data", target, beam_en, TString(info2));
 
     // create a canvas on which to draw the histograms
     TCanvas* c;
     c = new TCanvas(TString::Format("c"), TString::Format("c"), 800, 600);
-
+    
     // initialize things such as color options that will be used in plotting the histograms below
     const int color_options[5] = {kBlue, kAzure+10, kGreen-3, kViolet, kBlue+2};
     const char * draw_options[5] = {"HIST","HIST SAME","HIST SAME", "HIST SAME","HIST SAME"};
@@ -176,9 +236,9 @@ void h1_prot_mom_FSI(std::string sim, std::string targ, std::string beamen, std:
     double hist_max = 0.;
     // format the histograms and then make them
 
-    h1_mom_data[0]->SetMarkerStyle(kFullCircle);
-    h1_mom_data[0]->SetMarkerSize(1.5);
-    h1_mom_data[0]->SetMarkerColor(kBlack);
+    h1_mom_data[sectors[0]]->SetMarkerStyle(kFullCircle);
+    h1_mom_data[sectors[0]]->SetMarkerSize(1.5);
+    h1_mom_data[sectors[0]]->SetMarkerColor(kBlack);
 
     h1_mom_mc_total->SetLineColor(kBlack);
     h1_mom_mc_total->GetXaxis()->SetTitle("Proton Momentum (GeV)");
@@ -195,11 +255,15 @@ void h1_prot_mom_FSI(std::string sim, std::string targ, std::string beamen, std:
     h1_mom_mc_QE_FSI->SetLineStyle(kDashed);
     h1_mom_mc_non_QE->SetLineColor(kViolet);
 
+
     h1_mom_mc_QE_FSI->Draw("HIST E SAME");
     h1_mom_mc_QE_noFSI->Draw("HIST E SAME");
     h1_mom_mc_non_QE->Draw("HIST E SAME");
 
-    h1_mom_data[0]->Draw("E P SAME");
+    std::cout << "Here1" << "\n";
+
+    //h1_mom_data[sectors[0]]->Scale(1.35);
+    h1_mom_data[sectors[0]]->Draw("E P SAME");
 
 
     double cutval;
@@ -270,11 +334,12 @@ void h1_prot_mom_FSI(std::string sim, std::string targ, std::string beamen, std:
     cut->SetLineColor(kRed);
     cut->SetLineWidth(3);
     cut->Draw();
+    std::cout << "here2" << "\n";
 
         // draw a legend for our plot
-    TLegend *legend = new TLegend( .82,.65,.99,.85);
+    TLegend *legend = new TLegend( .62,.65,.82,.85);
     legend->AddEntry( h1_mom_mc_total, sim.c_str());
-    legend->AddEntry( h1_mom_data[0], "CLAS data");
+    legend->AddEntry( h1_mom_data[sectors[0]], "CLAS data");
     legend->AddEntry( h1_mom_mc_QE_FSI,"QE FSI");
     legend->AddEntry( h1_mom_mc_QE_noFSI,"QE no FSI");
     legend->AddEntry( h1_mom_mc_non_QE,"non QE");
@@ -282,17 +347,15 @@ void h1_prot_mom_FSI(std::string sim, std::string targ, std::string beamen, std:
     legend->SetFillStyle( 0);
     legend->Draw();
 
-
+    std::cout << "here3" << "\n";
     // crop the margins of the canvas
     c->SetLeftMargin( 0.2);
     c->SetBottomMargin( 0.2);
     c->SetRightMargin( 0.2);
     c->Update();
 
-    c->SaveAs(TString::Format("ProtMom/ProtMomcut_%s_%s_%s.pdf",targ.c_str(), beamen.c_str(), range.c_str()));
+    std::cout << "4? " << "\n";
 
-
-    
-
+//    c->SaveAs(TString::Format("ProtMom/8_9_ProtMomcut_%s_%s_%s.pdf",targ.c_str(), beamen.c_str(), range.c_str()));
    
 }

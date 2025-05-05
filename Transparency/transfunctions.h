@@ -44,14 +44,13 @@ double weighted_average(TH1D* h1) {
         return num_sum/den_sum;
 }
 
-
 double get_Neutron_corr(TString file, bool incl) {
 
         TFile *F = TFile::Open( TString( file ) );
         TH1D* hit_nuc;
         
         if (incl == true) {
-                hit_nuc = (TH1D*)F->Get("h1_hit_nuc");
+                hit_nuc = (TH1D*)F->Get(TString::Format("h1_hit_nuc"));
         }
 
         if (incl == false) {
@@ -61,7 +60,7 @@ double get_Neutron_corr(TString file, bool incl) {
         double protons = hit_nuc->GetBinContent(1);
         double neutrons = hit_nuc->GetBinContent(2);
 
-        if((neutrons + protons) == 0.0) return 0;
+        if((neutrons + protons) == 0.0) {std::cout << "file name: " << file << ", protons = " << protons << ", neutrons = " << neutrons << "\n"; return 0;}
         else return protons/(neutrons + protons);
 
 }
@@ -74,7 +73,7 @@ double get_MEC_corr(TString file, int sector, bool incl, double threshold = 0.0)
 
         if( incl == true ) {
                 for(int i = 0; i < 4; i++) {
-                        mom_Int[i] = (TH1D*)input->Get(TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", i+1, (sector) ));
+                        mom_Int[i] = (TH1D*)input->Get(TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", i+1, sector));
                 }
                 
         }
@@ -116,7 +115,7 @@ void ApplyMECcorr(TH1D &h1, double mec_corr[]) {
 
 
                 double newbincontent = bincontent*(corr_factor);
-                double newbinerror = sqrt(/*pow(bincontent*corr_factor_unc,2) +*/ pow(binerror*corr_factor,2));
+                double newbinerror = sqrt(pow(bincontent*corr_factor_unc,2) + pow(binerror*corr_factor,2));
                 
                 h1.SetBinContent(WhichBin + 1, newbincontent);
                 h1.SetBinError(WhichBin + 1, newbinerror);
@@ -134,7 +133,7 @@ double get_MEC_corr_overall(TString file,  bool incl, double threshold = 0.0) {
         if( incl == true ) {
                 for(int i = 0; i < 4; i++) {
                         for(int j = 0; j < 6; j++) {
-                                mom_Int[i][j] = (TH1D*)input->Get(TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", i+1, j ));
+                                mom_Int[i][j] = (TH1D*)input->Get(TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", i+1, j));
                                 if(i == 0 && j == 0) total = (TH1D*)(mom_Int[i][j]->Clone());
                                 else total->Add(mom_Int[i][j]);
                         }
@@ -171,6 +170,7 @@ double get_MEC_corr_overall(TString file,  bool incl, double threshold = 0.0) {
 }
 
 TH1D* SumElecInts(TString file, int sector, bool isData) {
+        //std::cout << "file = " << file << ", sector = " << sector << ", r = " << r << "\n";
         TFile *input = TFile::Open( TString( file ) );
 
         TH1D* el_mom;
@@ -181,14 +181,14 @@ TH1D* SumElecInts(TString file, int sector, bool isData) {
                         for (int i = 0; i < 4; i++) { // for all the interactions
 
                                 // extract the histrograms
-                                el_mom_Int[i] = (TH1D*)input->Get( TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", i+1, (sector) ));
+                                el_mom_Int[i] = (TH1D*)input->Get( TString::Format("h1_%i_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", i+1, sector));
                                 if( i == 0 ) el_mom = (TH1D*)( el_mom_Int[i]->Clone() );
                                 else el_mom->Add(el_mom_Int[i]);
                         }
         }
 
         if ( isData == true ) {
-                el_mom_d = (TH1D*)input->Get( TString::Format("h1_0_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", (sector) ));
+                el_mom_d = (TH1D*)input->Get( TString::Format("h1_0_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom__%i", sector));
                 el_mom = (TH1D*) ( el_mom_d->Clone() );
         }
 
@@ -245,6 +245,9 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
         
         TH1D::SetDefaultSumw2();
 
+	TH1D* reco = (TH1D*)hist->Clone();
+	TH1D* corrected_reco;
+
         TH1D* OverallClone = (TH1D*)hist->Clone();
 
         TH1D* susa_correction = (TH1D*)susa_true->Clone();
@@ -289,8 +292,10 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
         if(nucleus == "4He") nuc_no_A = "He";
         
         int NBins = OverallClone->GetXaxis()->GetNbins();
-        double AccCorrTolerance = 100.0;
+        double AccCorrTolerance = 5.0;
         //double RadCorrTolerance = 2.0;
+
+	double sum_of_corr = 0.0;
 
         for (int WhichBin = 0; WhichBin < NBins; WhichBin++) {
                 double AccCorr = 0.;
@@ -323,9 +328,16 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
                 
                 RadCorr = RadCorrection->GetBinContent(WhichBin + 1);
 
+		sum_of_corr+=RadCorr;
+
                 if(RadCorr <= 0.) RadCorr = 1.;
                 if(AccCorr <= 0.) AccCorr = 1.;
                 if(type != "data") RadCorr = 1.;
+
+
+		//std::cout << "Type = " << type << ", RadCorr = " << RadCorr << "\n";	
+
+		//RadCorr = 1.;	
 
                 NewBinContent = hist->GetBinContent(WhichBin + 1) * AccCorr * RadCorr;
                 NewBinError = hist->GetBinError(WhichBin + 1) * AccCorr * RadCorr;
@@ -333,7 +345,10 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
                 OverallClone->SetBinContent(WhichBin + 1, NewBinContent);
                 OverallClone->SetBinError(WhichBin + 1, NewBinError);
         }
+	std::cout << "Type = " << type << "\n";
+        std::cout << "Sum of radiative corrections = " << sum_of_corr << "\n";
 
+	corrected_reco = (TH1D*)OverallClone->Clone(); 
 
         TH1D* Spread = (TH1D*)susa_correction->Clone();
         Spread->Add(G_correction, -1);
@@ -348,7 +363,7 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
                 if (BinContent < 0) { Spread->SetBinContent(WhichBin+1,-BinContent); }
 
         }
-        /*
+        
         if(type == "data") {
                 for (int WhichBin = 0; WhichBin < NBinsSpread; WhichBin++) {
 
@@ -377,24 +392,56 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
 
                 }
         }
-        */
         
-        
+	std::string mylabel;
+	if(type == "G") mylabel = "hA2018_Final_NoRadCorr_LFGM";
+	if(type == "SuSA") mylabel = "SuSav2_NoRadCorr_LFGM_Truth_WithFidAcc"; 
+
+	if(make_plots) {UniversalE4vFunction(corrected_reco,FSIModelsToLabels[mylabel], nucleus, energy, TString::Format("corrected reco"));
+	UniversalE4vFunction(reco,FSIModelsToLabels[mylabel], nucleus, energy, TString::Format("reco"));}
 
         if(make_plots) {
-                TString tSCanvasName = TString::Format("SuSA_true_vs_reco_%s",hist->GetTitle());
+                TString tSCanvasName = TString::Format("true_vs_reco_%s",hist->GetTitle());
                 TCanvas* tSPlotCanvas = new TCanvas(tSCanvasName,tSCanvasName,205,34,1024,768);
-                PrettyDoubleXSecPlot(susa_true, p, E, r, false);
-                PrettyDoubleXSecPlot(susa_truereco, p, E, r, false);
-                susa_true->GetYaxis()->SetTitle("Scaled number of events");
+                PrettyDoubleXSecPlot(corrected_reco, p, E, r, true);
+                PrettyDoubleXSecPlot(reco, p, E, r, true);
+		PrettyDoubleXSecPlot(susa_true, p, E, r, true);
+                //PrettyDoubleXSecPlot(susa_truereco, p, E, r, true);
+		PrettyDoubleXSecPlot(G_true, p, E, r, true);
+                PrettyDoubleXSecPlot(G_truereco, p, E, r, true);
                 susa_true->SetTitle(TString::Format("True SuSav2 %s",hist->GetTitle()));
                 susa_truereco->SetTitle(TString::Format("Reco SuSav2 %s",hist->GetTitle()));
-                susa_true->SetLineColor(kRed);
-                susa_true->Draw("e hist");
-                susa_truereco->Draw("e hist same");
+        	G_true->SetTitle(TString::Format("True G18 %s",hist->GetTitle()));
+                G_truereco->SetTitle(TString::Format("Reco G18 %s",hist->GetTitle()));        
+		corrected_reco->SetTitle(TString::Format("Corrected Reco %s",hist->GetTitle()));
+                reco->SetTitle(TString::Format("Reco %s",hist->GetTitle()));	
+
+		corrected_reco->SetMarkerColor(kBlue); corrected_reco->SetMarkerStyle(kFullCircle); corrected_reco->SetMarkerSize(1.2);
+		reco->SetMarkerColor(kBlack); reco->SetMarkerStyle(kFullCircle); reco->SetMarkerSize(1.2);
+
+		susa_true->SetLineColor(kBlue);
+		//susa_truereco->SetLineStyle(kDashed);
+		susa_truereco->SetLineColor(kBlue);
+        
+		susa_true->GetYaxis()->SetRangeUser(0, G_true->GetMaximum() * 1.1);
+	        susa_true->Draw("hist");
+                susa_truereco->Draw("hist same");
+		G_true->SetLineColor(kRed);
+		G_truereco->SetLineColor(kRed);
+		G_truereco->SetLineStyle(kDashed);
+                G_true->Draw("hist same");
+                G_truereco->Draw("hist same");
+
+		corrected_reco->Draw("p same");
+		reco->Draw("p same");
+
                 TLegend *accSLegend = new TLegend(.82,.65,.99,.85);
-                accSLegend->AddEntry(susa_true, "True"); 
-                accSLegend->AddEntry(susa_truereco, "Reco"); 
+                accSLegend->AddEntry(susa_true, "SuSAv2 True","l"); 
+                accSLegend->AddEntry(susa_truereco, "SuSAv2 TrueReco","l");
+		accSLegend->AddEntry(G_true, "G18 True","l");
+                accSLegend->AddEntry(G_truereco, "G18 TrueReco","l");
+		accSLegend->AddEntry(corrected_reco, "SuSAv2 Corrected Reco", "p");
+		accSLegend->AddEntry(reco, "SuSAv2 Reco", "p"); 
                 accSLegend->SetBorderSize(0);
                 accSLegend->Draw();
                 tSPlotCanvas->SetLeftMargin( 0.2);
@@ -402,28 +449,6 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
                 tSPlotCanvas->SetRightMargin(0.2);
                 tSPlotCanvas->Update();
                 tSPlotCanvas->SaveAs(TString::Format("%s/%s_%s.pdf",nucleus.c_str(),nucleus.c_str(), tSCanvasName.Data()));
-
-                TString tGCanvasName = TString::Format("G18_true_vs_reco_%s",hist->GetTitle());
-                std::cout << "Canvas name = " << tGCanvasName << "\n";
-                TCanvas* tGPlotCanvas = new TCanvas(tGCanvasName,tGCanvasName,205,34,1024,768);
-                PrettyDoubleXSecPlot(G_true, p, E, r, false);
-                PrettyDoubleXSecPlot(G_truereco, p, E, r, false);
-                G_true->GetYaxis()->SetTitle("Scaled number of events");
-                G_true->SetTitle(TString::Format("True G18 %s",hist->GetTitle()));
-                G_truereco->SetTitle(TString::Format("Reco G18 %s",hist->GetTitle()));
-                G_true->SetLineColor(kRed);
-                G_true->Draw("e hist");
-                G_truereco->Draw("e hist same");
-                TLegend *accGLegend = new TLegend(.82,.65,.99,.85);
-                accGLegend->AddEntry(G_true, "True"); 
-                accGLegend->AddEntry(G_truereco, "Reco"); 
-                accGLegend->SetBorderSize(0);
-                accGLegend->Draw();
-                tGPlotCanvas->SetLeftMargin( 0.2);
-                tGPlotCanvas->SetBottomMargin( 0.2);
-                tGPlotCanvas->SetRightMargin(0.2);
-                tGPlotCanvas->Update();
-                tGPlotCanvas->SaveAs(TString::Format("%s/%s_%s.pdf",nucleus.c_str(),nucleus.c_str(), tGCanvasName.Data()));
 
                 if(type == "SF" && sf_true !=NULL) {
                         TString tSFCanvasName = TString::Format("SF_true_vs_reco_%s",hist->GetTitle());
@@ -454,7 +479,7 @@ TH1D* AcceptanceCorrect(TH1D* hist, TH1D* susa_true, TH1D* susa_truereco, TH1D* 
                 PrettyDoubleXSecPlot(susa_truereco_rad, p, E, r, false);
                 susa_truereco->Draw("e hist");
                 susa_truereco->SetLineColor(kBlack);
-                susa_truereco_rad->SetLineColor(kGreen);
+                susa_truereco_rad->SetLineColor(kBlue);
                 susa_truereco_rad->SetTitle(TString::Format("Reco Rad %s",hist->GetTitle()));
                 susa_truereco_rad->Draw("e hist same");
                 TLegend *radLegend = new TLegend(.82,.65,.99,.85);
@@ -590,7 +615,7 @@ TH1D* AcceptanceCorrectSF(TH1D* hist, TH1D* SF_true, TH1D* SF_truereco, TH1D* su
                 susa_truereco->GetXaxis()->SetTitle("Momentum (GeV)");
                 susa_truereco->Draw("e hist");
                 susa_truereco->SetLineColor(kBlack);
-                susa_truereco_rad->SetLineColor(kGreen);
+                susa_truereco_rad->SetLineColor(kBlue);
                 susa_truereco_rad->SetTitle(TString::Format("Reco Rad %s",hist->GetTitle()));
                 susa_truereco_rad->Draw("e hist same");
                 TLegend *radLegend = new TLegend(.82,.65,.99,.85);

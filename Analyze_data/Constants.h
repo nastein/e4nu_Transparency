@@ -21,6 +21,19 @@
 	const double He3_bind_en = 0.0077, D2_bind_en = 0.00222, Fe_bind_en = 0.49226, Mn_bind_en = 0.4820764;
 	const double e_mass = 0.000510998;
 
+        static std::map< std::pair<TString,TString>, std::vector<double>> elec_mom_cuts = 
+	{
+	{std::make_pair("C12", "2261"), {0,1.95,1.9,1.85,1.75,1.7,1.6,1.5} },
+	{std::make_pair("C12", "4461"), {3.65, 3.4, 0, 0, 0, 0, 0, 0}},
+	{std::make_pair("4He", "2261"), {0,1.9,1.85,1.8,1.75,1.7,1.6,1.5} },
+        {std::make_pair("4He", "4461"), {3.65, 3.4, 0, 0, 0, 0, 0, 0}},
+	{std::make_pair("56Fe", "2261"), {0,1.95,1.9,1.85,1.75,1.7,1.6,1.5} },
+        {std::make_pair("56Fe", "4461"), {3.65, 3.35, 0, 0, 0, 0, 0, 0}},
+	};
+
+	const int e_theta_number_of_bins = 8;
+    	const double e_theta_bins[e_theta_number_of_bins+1] = {19.,21.,23.,25.,28.,31.,34.,37.,40.};
+
 	const double fine_struc_const = 0.007297;
 	const double ns_to_s = 1.0E-9;
 	const Double_t c = 2.99792E+10;

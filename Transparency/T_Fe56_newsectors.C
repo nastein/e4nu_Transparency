@@ -70,7 +70,7 @@ void T_Fe56_newsectors(bool make_plots = false) {
 
         std::string energies[4] = {"2_261", "2_261", "2_261", "4_461"};
         double prot_mom_cuts[4] = {.5,.8,1.1,1.4};
-        double offset = -0.05;
+        double offset = -0.0;
 
         for(int i = 0; i < 4; i++) {
                 prot_mom_cuts[i] += offset;
@@ -154,7 +154,6 @@ void T_Fe56_newsectors(bool make_plots = false) {
                                        
                                         
                                 }
-                                std::cout << "why" << "\n";
                                 
                                 UniversalE4vFunction(SuSA_2261_true[r][p][s], FSIModelsToLabels["SuSav2_NoRadCorr_LFGM_Truth_WithoutFidAcc"], "56Fe",TString::Format("%s", energies[r].c_str()), TString::Format("susa_2261_mom_%i%i%i",r,p,s+1),r);
                                 UniversalE4vFunction(SuSA_2261_true_reco[r][p][s], FSIModelsToLabels["SuSav2_NoRadCorr_LFGM_Truth_WithFidAcc"], "56Fe",TString::Format("%s", energies[r].c_str()), TString::Format("susa_reco_2261_mom_%i%i%i",r,p,s+1),r);
@@ -166,7 +165,6 @@ void T_Fe56_newsectors(bool make_plots = false) {
                         }
                 }
         }
-        std::cout << "here3" << "\n";
 
 // --------------------- Getting MC exclusive and inclusive measurements and mec/neutron corrections ----------------
 
@@ -244,8 +242,6 @@ void T_Fe56_newsectors(bool make_plots = false) {
         
 
 // --------------------- Getting Data exclusive and inclusive measurements ----------------
-
-        // Here we will also scale the data
         TH1D* Data_2261[4][2][6];
         TH1D* Data_4461[1][2][6];
 
@@ -264,8 +260,6 @@ void T_Fe56_newsectors(bool make_plots = false) {
                         }
                 }
         }
-
-        std::cout << "What" << "\n";
 
 // ---------------- Acceptance correct all histograms ---------------------
 
@@ -292,7 +286,6 @@ void T_Fe56_newsectors(bool make_plots = false) {
         
 
 // ---------------- Get average proton momentum for data and MC ------------------------
-std::cout << "In the name " << "\n";
         double data_avg_prot_mom_1161[2][6];
         double data_avg_prot_mom_2261[4][6];
         double data_avg_prot_mom_4461[1][6];
@@ -323,11 +316,10 @@ std::cout << "In the name " << "\n";
                         //2261
                         for(int s : sectors[r]) {
                                 if(p == 1) s = (s+3)%6;
-                                //ApplySystUnc(Data_2261[r][p][s],TString::Format("%s",energies[r].c_str())); 
+                                ApplySystUnc(Data_2261[r][p][s],TString::Format("%s",energies[r].c_str())); 
                         }
                 }
-        }
-std::cout << "seriously why" << "\n"; 
+        } 
 // -------------- Correct for MEC and neutron contamination --------------
         //Correct Data by (1-(MECfrac))*(G18_prot/(G18_prot + G18_neut))
         //Correct MC by (1-(MECfrac))*(SuSA_prot/(SuSA_prot + SuSA_neut))
@@ -345,10 +337,15 @@ std::cout << "seriously why" << "\n";
                                 G_2261[r][p][s]->Scale((1. - mec_corr_G_2261[r][p][s]));
                                 
                                 if(p == 1) {  
-                                        SuSA_2261[r][p][s]->Scale(neutron_corr_2261_susa[r][p]);
+                                        SuSA_2261[r][p][s]->Scale(neutron_corr_2261_G18[r][p]);
                                         Data_2261[r][p][s]->Scale(neutron_corr_2261_G18[r][p]);
                                         G_2261[r][p][s]->Scale(neutron_corr_2261_G18[r][p]);
                                 }
+
+				if(p == 0) {
+					SuSA_2261[r][p][s]->Scale(neutron_corr_2261_G18[r][1]/neutron_corr_2261_susa[r][1]);
+				}
+
                         }
                 }
         }
@@ -359,6 +356,8 @@ std::cout << "seriously why" << "\n";
         TH1D* Data_comb_4461[1][2];
         TH1D* SuSA_comb_1161[2][2];
         TH1D* SuSA_comb_2261[4][2];
+	TH1D* SuSA_true_comb_2261[4][2];
+	TH1D* G_true_comb_2261[4][2];
         TH1D* SuSA_comb_4461[1][2];
         TH1D* G_comb_1161[2][2];
         TH1D* G_comb_2261[4][2];
@@ -371,18 +370,19 @@ std::cout << "seriously why" << "\n";
                         Data_comb_2261[r][p] = new TH1D(TString::Format("data %s",second_en[r][p].c_str()),TString::Format("data %s",second_en[r][p].c_str()),150, 0., 6.);
                         SuSA_comb_2261[r][p] = new TH1D(TString::Format("SuSA %s",second_en[r][p].c_str()),TString::Format("SuSA %s",second_en[r][p].c_str()),150, 0., 6.);
                         G_comb_2261[r][p] = new TH1D(TString::Format("G %s",second_en[r][p].c_str()),TString::Format("G %s",second_en[r][p].c_str()),150, 0., 6.);
-                
+                	SuSA_true_comb_2261[r][p] = new TH1D(TString::Format("SuSA true %s",second_en[r][p].c_str()),TString::Format("SuSA true %s",second_en[r][p].c_str()),150, 0., 6.);
+                        G_true_comb_2261[r][p] = new TH1D(TString::Format("G true %s",second_en[r][p].c_str()),TString::Format("G true %s",second_en[r][p].c_str()),150, 0., 6.);
+
                         for(int s : sectors[r] ){
                                 if(p == 1) s = (s+3)%6;
-
+				SuSA_true_comb_2261[r][p]->Add( SuSA_2261_true[r][p][s] );
+                                G_true_comb_2261[r][p]->Add( G_2261_true[r][p][s] );
                                 Data_comb_2261[r][p]->Add( Data_2261[r][p][s] );
                                 SuSA_comb_2261[r][p]->Add( SuSA_2261[r][p][s] );
                                 G_comb_2261[r][p]->Add( G_2261[r][p][s] );
                         }
                 }       
         }
-
-        std::cout << "here 4hwhawe " << "\n";
 
         double data_comb_int_1161[2][2];
         double data_comb_int_2261[4][2];
@@ -422,7 +422,6 @@ std::cout << "seriously why" << "\n";
                         G_comb_int_2261[r][p] = G_comb_2261[r][p]->IntegralAndError(1, G_comb_2261[r][p]->GetNbinsX(), G_comb_int_2261_err[r][p],"width");          
                 }
         }
-        std::cout << "the fuck22 " << "\n";
 
         double data_comb_avg_prot_mom_1161[2];
         double data_comb_avg_prot_mom_2261[4];
@@ -460,8 +459,6 @@ std::cout << "seriously why" << "\n";
 
 // -------------- Integrate sector by sector histograms -----------------
 
-std::cout << "must be here" << "\n";
-
         double data_int_1161[2][2][6];
         double data_int_2261[4][2][6];
         double data_int_4461[1][2][6];
@@ -496,8 +493,6 @@ std::cout << "must be here" << "\n";
                         }
                 }
         }
-
-std::cout << "damn" << "\n";
 // ----------- Take Ratios to obtain transparencies and errors --------------
         //Remember that a proton in sector i corresponds to an electron in sector (i+3%6)
 
@@ -719,9 +714,9 @@ std::cout << "damn" << "\n";
         }
         //comb_ypoint_errs[0] = sqrt(pow(data_comb_T_1161_err[0],2) + pow(data_spread_T_1161[0],2));
         //comb_ypoint_errs[1] = sqrt(pow(data_comb_T_1161_err[1],2) + pow(data_spread_T_1161[1],2));
-        comb_ypoint_errs[0] = sqrt(pow(data_comb_T_2261_err[0],2)/* + pow(data_spread_T_2261[0],2) + pow(prot_mom_shift[0],2) + pow(thetaPQ_shift[0],2) + pow(elec_mom_shift[0],2)*/);
-        comb_ypoint_errs[1] = sqrt(pow(data_comb_T_2261_err[1],2)/* + pow(data_spread_T_2261[1],2) + pow(prot_mom_shift[1],2) + pow(thetaPQ_shift[1],2) + pow(elec_mom_shift[1],2)*/);
-        comb_ypoint_errs[2] = sqrt(pow(data_comb_T_2261_err[2],2)/* + pow(data_spread_T_2261[2],2) + pow(prot_mom_shift[2],2) + pow(thetaPQ_shift[2],2) + pow(elec_mom_shift[2],2)*/);
+        comb_ypoint_errs[0] = sqrt(pow(data_comb_T_2261_err[0],2) + pow(data_spread_T_2261[0],2) + pow(prot_mom_shift[0],2) + pow(thetaPQ_shift[0],2) + pow(elec_mom_shift[0],2));
+        comb_ypoint_errs[1] = sqrt(pow(data_comb_T_2261_err[1],2) + pow(data_spread_T_2261[1],2) + pow(prot_mom_shift[1],2) + pow(thetaPQ_shift[1],2) + pow(elec_mom_shift[1],2));
+        comb_ypoint_errs[2] = sqrt(pow(data_comb_T_2261_err[2],2) + pow(data_spread_T_2261[2],2) + pow(prot_mom_shift[2],2) + pow(thetaPQ_shift[2],2) + pow(elec_mom_shift[2],2));
 
         //double comb_xpoints[6] = {data_comb_avg_prot_mom_1161[0], data_comb_avg_prot_mom_1161[1], data_comb_avg_prot_mom_2261[0], data_comb_avg_prot_mom_2261[1], data_comb_avg_prot_mom_2261[2], data_comb_avg_prot_mom_4461[0]};
         double comb_xpoints[3] = {data_comb_avg_prot_mom_2261[0], data_comb_avg_prot_mom_2261[1], data_comb_avg_prot_mom_2261[2]};
@@ -929,7 +924,7 @@ std::cout << "damn" << "\n";
 
                         for(int p = 0; p < 2; p++) {
 
-                                leg2261[r][p] = new TLegend(.82,.65,.99,.85);
+                                leg2261[r][p] = new TLegend(.62,.65,.79,.85);
                                 leg2261[r][p]->SetBorderSize(0);
 
                                 for(int s : sectors[r]) {
@@ -942,16 +937,17 @@ std::cout << "damn" << "\n";
                                         }
 
                                         UniversalE4vFunction(Data_2261[r][p][s], "Pinned Data", "56Fe", TString::Format("%s",energies[r].c_str()), TString::Format("Data_%s_mom_reco_%i%i%i",energies[r].c_str(),r,p,s+1),r);
-                                        PrettyDoubleXSecPlot(Data_2261[r][p][s], p, energy_val[energies[r]], r, true);
-                                        //if(s!=firstsector) Data_2261[r][p][s]->Divide(Data_2261[r][p][firstsector]);
-                                        Data_2261[r][p][s]->SetMarkerColor(SectorColors[s]);
+                                        PrettyDoubleXSecPlot(Data_2261[r][p][s], p, energy_val[energies[r]], r, sectors[r].size(),true);
+					 //if(s!=firstsector) Data_2261[r][p][s]->Divide(Data_2261[r][p][firstsector]);
+                 			//Data_2261[r][p][s]->Scale(1.35);
+		                        Data_2261[r][p][s]->SetMarkerColor(SectorColors[s]);
                                         Data_2261[r][p][s]->SetMarkerStyle(20);
                                         if(s == firstsector) {
                                                 TH1D* copy = (TH1D*)(Data_2261[r][p][s]->Clone());
                                                 //copy->Divide(Data_2261[r][p][s]);
                                                 copy->Draw("e p ");
                                                 copy->GetYaxis()->SetRangeUser(0,1.5*copy->GetMaximum());
-                                                copy->GetXaxis()->SetRangeUser(prot_mom_cuts[r], 2.0);
+                                                if(p == 0) copy->GetXaxis()->SetRangeUser(prot_mom_cuts[r], 2.0);
                                                 //copy->GetYaxis()->SetTitle(TString::Format("Ratio to Sector %i", firstsector+1));
                                         }
                                         else Data_2261[r][p][s]->Draw("e p same ");
@@ -993,60 +989,78 @@ std::cout << "damn" << "\n";
                         }
                 }
                 //reco_dist_canvas->SaveAs("56Fe_reco_dist.pdf)");
-
-                TCanvas* total_reco_dist_canvas = new TCanvas("total reco can","total reco can",1200,1000);
-
-                total_reco_dist_canvas->SetLeftMargin( 0.2);
-                total_reco_dist_canvas->SetBottomMargin( 0.2);
-                total_reco_dist_canvas->SetRightMargin( 0.2);
-                //total_reco_dist_canvas->SaveAs("56Fe_total_reco_dist.pdf(");
-
-
-                TLegend *tot_leg2261[4][2];
-                TLegend *tot_leg4461[1][2];
-
-                for(int r = 0; r < 3; r++) {
-                        for (int p = 0; p < 2; p ++) {
-                                tot_leg2261[r][p] = new TLegend(.82,.65,.99,.85);
-                                tot_leg2261[r][p]->SetBorderSize(0);
-
-                                
-                                PrettyDoubleXSecPlot(SuSA_comb_2261[r][p], p, energy_val[energies[r]], r, true);
-                                PrettyDoubleXSecPlot(Data_comb_2261[r][p], p, energy_val[energies[r]], r, true);
-                                PrettyDoubleXSecPlot(G_comb_2261[r][p], p, energy_val[energies[r]], r, true);
-
-                                UniversalE4vFunction(SuSA_comb_2261[r][p], FSIModelsToLabels["SuSav2_NoRadCorr_LFGM_Truth_WithFidAcc"], "56Fe", TString::Format("%s",energies[r].c_str()), TString::Format("SuSA_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
-                                UniversalE4vFunction(G_comb_2261[r][p], FSIModelsToLabels["hA2018_Final_NoRadCorr_LFGM"], "56Fe", TString::Format("%s",energies[r].c_str()), TString::Format("G18_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
-                                UniversalE4vFunction(Data_comb_2261[r][p], "Pinned Data", "56Fe", TString::Format("%s",energies[r].c_str()), TString::Format("Data_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
-
-
-                                SuSA_comb_2261[r][p]->GetXaxis()->SetRangeUser(prot_mom_cuts[r], 2.0);
-
-                                SuSA_comb_2261[r][p]->Draw("e hist");
-                                G_comb_2261[r][p]->Draw("e hist same");
-                                SuSA_comb_2261[r][p]->SetTitle("SuSA_v2 Fe");
-                                G_comb_2261[r][p]->SetTitle("G18 Fe");
-                                
-                                Data_comb_2261[r][p]->Draw("e same");
-                                Data_comb_2261[r][p]->SetTitle("Data Fe");
-                                Data_comb_2261[r][p]->SetMarkerColor(kBlack);
-                                Data_comb_2261[r][p]->SetMarkerStyle(20);
-
-                                findmaxhist(SuSA_comb_2261[r][p], Data_comb_2261[r][p], G_comb_2261[r][p]);
-                                
-                                G_comb_2261[r][p]->SetLineColor(kRed);
-
-                                tot_leg2261[r][p]->AddEntry(G_comb_2261[r][p]);
-                                tot_leg2261[r][p]->AddEntry(Data_comb_2261[r][p]);
-                                tot_leg2261[r][p]->AddEntry(SuSA_comb_2261[r][p]);
-                                tot_leg2261[r][p]->Draw();
-                                
-                                SuSA_comb_2261[r][p]->SetTitle(TString::Format("SuSA_v2 Fe %s", second_en[r][p].c_str()));
-                                total_reco_dist_canvas->SaveAs(TString::Format("56Fe/56Fe_%s_xsec.pdf", second_en[r][p].c_str()));
-                        }
-                }
-                //total_reco_dist_canvas->SaveAs("56Fe_total_reco_dist.pdf)");
         }
+
+        TCanvas* total_reco_dist_canvas[3][2];
+	for(int r = 0; r < 3; r++) {
+		for(int p = 0; p < 2; p++) {
+	
+			total_reco_dist_canvas[r][p] = new TCanvas(TString::Format("total reco can %i %i",r,p),TString::Format("total reco can %i %i",r,p),1200,1000);
+        		total_reco_dist_canvas[r][p]->SetLeftMargin( 0.2);
+        		total_reco_dist_canvas[r][p]->SetBottomMargin( 0.2);
+        		total_reco_dist_canvas[r][p]->SetRightMargin( 0.2);
+		}
+	}
+
+        TLegend *tot_leg2261[4][2];
+        TLegend *tot_leg4461[1][2];
+
+        for(int r = 0; r < 3; r++) {
+                for (int p = 0; p < 2; p ++) {
+         
+			total_reco_dist_canvas[r][p]->cd();
+	               tot_leg2261[r][p] = new TLegend(.62,.65,.79,.85);
+                        tot_leg2261[r][p]->SetBorderSize(0);
+
+                        
+                        PrettyDoubleXSecPlot(SuSA_comb_2261[r][p], p, energy_val[energies[r]], r, sectors[r].size(),true);
+                        PrettyDoubleXSecPlot(Data_comb_2261[r][p], p, energy_val[energies[r]], r, sectors[r].size(),true);
+                        PrettyDoubleXSecPlot(G_comb_2261[r][p], p, energy_val[energies[r]], r, sectors[r].size(),true);
+			PrettyDoubleXSecPlot(G_true_comb_2261[r][p], p, energy_val[energies[r]], r, sectors[r].size(),true);
+                        PrettyDoubleXSecPlot(SuSA_true_comb_2261[r][p], p, energy_val[energies[r]], r, sectors[r].size(),true);
+
+                        UniversalE4vFunction(SuSA_comb_2261[r][p], FSIModelsToLabels["SuSav2_NoRadCorr_LFGM_Truth_WithFidAcc"], "56Fe", TString::Format("%s",energies[r].c_str()), TString::Format("SuSA_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
+                        UniversalE4vFunction(G_comb_2261[r][p], FSIModelsToLabels["hA2018_Final_NoRadCorr_LFGM"], "56Fe", TString::Format("%s",energies[r].c_str()), TString::Format("G18_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
+                        UniversalE4vFunction(Data_comb_2261[r][p], "Pinned Data", "56Fe", TString::Format("%s",energies[r].c_str()), TString::Format("Data_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
+
+			
+                        if(p == 0) SuSA_comb_2261[r][p]->GetXaxis()->SetRangeUser(prot_mom_cuts[r], 2.0);
+
+                        SuSA_comb_2261[r][p]->Draw("e hist");
+                        G_comb_2261[r][p]->Draw("e hist same");
+                        SuSA_comb_2261[r][p]->SetTitle("SuSA_v2 Fe");
+                        G_comb_2261[r][p]->SetTitle("G18 Fe");
+                        
+			//SuSA_true_comb_2261[r][p]->Draw("e hist same");
+			//G_true_comb_2261[r][p]->Draw("e hist same");
+			SuSA_true_comb_2261[r][p]->SetLineColor(kBlue);
+			SuSA_true_comb_2261[r][p]->SetLineStyle(kDashed);
+			G_true_comb_2261[r][p]->SetLineColor(kRed);
+			G_true_comb_2261[r][p]->SetLineStyle(kDashed);
+
+			//Data_comb_2261[r][p]->Scale(1.35);
+                        Data_comb_2261[r][p]->Draw("e same");
+                        Data_comb_2261[r][p]->SetTitle("Data Fe");
+                        Data_comb_2261[r][p]->SetMarkerColor(kBlack);
+                        Data_comb_2261[r][p]->SetMarkerStyle(20);
+
+                        findmaxhist(SuSA_comb_2261[r][p], Data_comb_2261[r][p], G_comb_2261[r][p]);
+                        
+                        G_comb_2261[r][p]->SetLineColor(kRed);
+
+                        tot_leg2261[r][p]->AddEntry(G_comb_2261[r][p]);
+                        tot_leg2261[r][p]->AddEntry(Data_comb_2261[r][p]);
+                        tot_leg2261[r][p]->AddEntry(SuSA_comb_2261[r][p]);
+			//tot_leg2261[r][p]->AddEntry(SuSA_true_comb_2261[r][p], "SuSAv2 true");
+			//tot_leg2261[r][p]->AddEntry(G_true_comb_2261[r][p], "G18 true"); 
+                       tot_leg2261[r][p]->Draw();
+                        
+                        SuSA_comb_2261[r][p]->SetTitle(TString::Format("SuSA_v2 Fe %s", second_en[r][p].c_str()));
+                        total_reco_dist_canvas[r][p]->SaveAs(TString::Format("56Fe/56Fe_%s_xsec.pdf", second_en[r][p].c_str()));
+                }
+        }
+        //total_reco_dist_canvas->SaveAs("56Fe_total_reco_dist.pdf)");
+        
 
 }
 

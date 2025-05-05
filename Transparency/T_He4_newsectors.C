@@ -85,7 +85,7 @@ void T_He4_newsectors(bool make_plots = false) {
 
         std::string energies[4] = {"2_261", "2_261", "2_261", "4_461"};
         double prot_mom_cuts[4] = {.5,.7,1.,1.35};
-        double offset = -0.05;
+        double offset = -0.00;
 
         for(int i = 0; i < 4; i++) {
                 prot_mom_cuts[i] += offset;
@@ -332,7 +332,7 @@ void T_He4_newsectors(bool make_plots = false) {
                         //2261
                         for(int s : sectors[r]) {
                                 if(p == 1) s = (s+3)%6;
-                                //ApplySystUnc(Data_2261[r][p][s],TString::Format("%s",energies[r].c_str())); 
+                                ApplySystUnc(Data_2261[r][p][s],TString::Format("%s",energies[r].c_str())); 
                         }
                 }
         }
@@ -354,10 +354,16 @@ void T_He4_newsectors(bool make_plots = false) {
                                 G_2261[r][p][s]->Scale((1. - mec_corr_G_2261[r][p][s]));
                                 
                                 if(p == 1) {  
-                                        SuSA_2261[r][p][s]->Scale(neutron_corr_2261_susa[r][p]);
+                                        SuSA_2261[r][p][s]->Scale(neutron_corr_2261_G18[r][p]);
                                         Data_2261[r][p][s]->Scale(neutron_corr_2261_G18[r][p]);
                                         G_2261[r][p][s]->Scale(neutron_corr_2261_G18[r][p]);
                                 }
+
+
+				if(p == 0) {
+					SuSA_2261[r][p][s]->Scale(neutron_corr_2261_G18[r][1]/neutron_corr_2261_susa[r][1]);
+				}
+
                         }
                 }
         }
@@ -372,6 +378,8 @@ void T_He4_newsectors(bool make_plots = false) {
         TH1D* G_comb_1161[2][2];
         TH1D* G_comb_2261[4][2];
         TH1D* G_comb_4461[1][2];
+        TH1D* SuSA_true_comb_2261[4][2];
+        TH1D* G_true_comb_2261[4][2];
         
         for(int p = 0; p < 2; p++ ) {
 
@@ -380,10 +388,13 @@ void T_He4_newsectors(bool make_plots = false) {
                         Data_comb_2261[r][p] = new TH1D(TString::Format("data %s",second_en[r][p].c_str()),TString::Format("data %s",second_en[r][p].c_str()),150, 0., 6.);
                         SuSA_comb_2261[r][p] = new TH1D(TString::Format("SuSA %s",second_en[r][p].c_str()),TString::Format("SuSA %s",second_en[r][p].c_str()),150, 0., 6.);
                         G_comb_2261[r][p] = new TH1D(TString::Format("G %s",second_en[r][p].c_str()),TString::Format("G %s",second_en[r][p].c_str()),150, 0., 6.);
-                
+                        SuSA_true_comb_2261[r][p] = new TH1D(TString::Format("SuSA true %s",second_en[r][p].c_str()),TString::Format("SuSA true %s",second_en[r][p].c_str()),150, 0., 6.);
+                        G_true_comb_2261[r][p] = new TH1D(TString::Format("G true %s",second_en[r][p].c_str()),TString::Format("G true %s",second_en[r][p].c_str()),150, 0., 6.);
+
                         for(int s : sectors[r] ){
                                 if(p == 1) s = (s+3)%6;
-
+                                SuSA_true_comb_2261[r][p]->Add( SuSA_2261_true[r][p][s] );
+                                G_true_comb_2261[r][p]->Add( G_2261_true[r][p][s] );
                                 Data_comb_2261[r][p]->Add( Data_2261[r][p][s] );
                                 SuSA_comb_2261[r][p]->Add( SuSA_2261[r][p][s] );
                                 G_comb_2261[r][p]->Add( G_2261[r][p][s] );
@@ -727,10 +738,10 @@ void T_He4_newsectors(bool make_plots = false) {
         }
         //comb_ypoint_errs[0] = sqrt(pow(data_comb_T_1161_err[0],2) + pow(data_spread_T_1161[0],2));
         //comb_ypoint_errs[1] = sqrt(pow(data_comb_T_1161_err[1],2) + pow(data_spread_T_1161[1],2));
-        comb_ypoint_errs[0] = sqrt(pow(data_comb_T_2261_err[0],2)/* + pow(data_spread_T_2261[0],2) + pow(prot_mom_shift[0],2) + pow(thetaPQ_shift[0],2) + pow(elec_mom_shift[0],2)*/);
-        comb_ypoint_errs[1] = sqrt(pow(data_comb_T_2261_err[1],2)/* + pow(data_spread_T_2261[1],2) + pow(prot_mom_shift[1],2) + pow(thetaPQ_shift[1],2) + pow(elec_mom_shift[1],2)*/);
-        comb_ypoint_errs[2] = sqrt(pow(data_comb_T_2261_err[2],2)/* + pow(data_spread_T_2261[2],2) + pow(prot_mom_shift[2],2) + pow(thetaPQ_shift[2],2) + pow(elec_mom_shift[2],2)*/);
-        comb_ypoint_errs[3] = sqrt(pow(data_comb_T_2261_err[3],2)/* + pow(data_spread_T_2261[3],2) + pow(prot_mom_shift[3],2) + pow(thetaPQ_shift[3],2) + pow(elec_mom_shift[3],2)*/);
+        comb_ypoint_errs[0] = sqrt(pow(data_comb_T_2261_err[0],2) + pow(data_spread_T_2261[0],2) + pow(prot_mom_shift[0],2) + pow(thetaPQ_shift[0],2) + pow(elec_mom_shift[0],2));
+        comb_ypoint_errs[1] = sqrt(pow(data_comb_T_2261_err[1],2) + pow(data_spread_T_2261[1],2) + pow(prot_mom_shift[1],2) + pow(thetaPQ_shift[1],2) + pow(elec_mom_shift[1],2));
+        comb_ypoint_errs[2] = sqrt(pow(data_comb_T_2261_err[2],2) + pow(data_spread_T_2261[2],2) + pow(prot_mom_shift[2],2) + pow(thetaPQ_shift[2],2) + pow(elec_mom_shift[2],2));
+        comb_ypoint_errs[3] = sqrt(pow(data_comb_T_2261_err[3],2) + pow(data_spread_T_2261[3],2) + pow(prot_mom_shift[3],2) + pow(thetaPQ_shift[3],2) + pow(elec_mom_shift[3],2));
 
 
         //double comb_xpoints[6] = {data_comb_avg_prot_mom_1161[0], data_comb_avg_prot_mom_1161[1], data_comb_avg_prot_mom_2261[0], data_comb_avg_prot_mom_2261[1], data_comb_avg_prot_mom_2261[2], data_comb_avg_prot_mom_4461[0]};
@@ -938,7 +949,7 @@ void T_He4_newsectors(bool make_plots = false) {
 
                         for(int p = 0; p < 2; p++) {
 
-                                leg2261[r][p] = new TLegend(.82,.65,.99,.85);
+                                leg2261[r][p] = new TLegend(.62,.65,.79,.85);
                                 leg2261[r][p]->SetBorderSize(0);
 
                                 for(int s : sectors[r]) {
@@ -950,7 +961,7 @@ void T_He4_newsectors(bool make_plots = false) {
                                                 }
                                         }
                                         UniversalE4vFunction(Data_2261[r][p][s], "Pinned Data", "4He", TString::Format("%s",energies[r].c_str()), TString::Format("Data_%s_mom_reco_%i%i%i",energies[r].c_str(),r,p,s+1),r);
-                                        PrettyDoubleXSecPlot(Data_2261[r][p][s], p, energy_val[energies[r]], r, true);
+                                        PrettyDoubleXSecPlot(Data_2261[r][p][s], p, energy_val[energies[r]], r, sectors[r].size(),true);
                                         //if(s!=firstsector) Data_2261[r][p][s]->Divide(Data_2261[r][p][firstsector]);
                                         Data_2261[r][p][s]->SetMarkerColor(SectorColors[s]);
                                         Data_2261[r][p][s]->SetMarkerStyle(20);
@@ -1000,57 +1011,76 @@ void T_He4_newsectors(bool make_plots = false) {
                                 reco_dist_canvas->SaveAs(TString::Format("4He/4He_%s_sector_xsec.pdf", second_en[r][p].c_str()));
                         }
                 }
+        }
                
-                TCanvas* total_reco_dist_canvas = new TCanvas("total reco can","total reco can",1200,1000);
-
-                total_reco_dist_canvas->SetLeftMargin( 0.2);
-                total_reco_dist_canvas->SetBottomMargin( 0.2);
-                total_reco_dist_canvas->SetRightMargin( 0.2);
-                
-
-                TLegend *tot_leg2261[4][2];
-                TLegend *tot_leg4461[1][2];
-
-                for(int r = 0; r < 4; r++) {
-                        for (int p = 0; p < 2; p ++) {
-                                tot_leg2261[r][p] = new TLegend(.82,.65,.99,.85);
-                                tot_leg2261[r][p]->SetBorderSize(0);
-
-                                
-                                PrettyDoubleXSecPlot(SuSA_comb_2261[r][p], p, energy_val[energies[r]], r, true);
-                                PrettyDoubleXSecPlot(Data_comb_2261[r][p], p, energy_val[energies[r]], r, true);
-                                PrettyDoubleXSecPlot(G_comb_2261[r][p], p, energy_val[energies[r]], r, true);
-
-                                UniversalE4vFunction(SuSA_comb_2261[r][p], FSIModelsToLabels["SuSav2_NoRadCorr_LFGM_Truth_WithFidAcc"], "4He", TString::Format("%s",energies[r].c_str()), TString::Format("SuSA_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
-                                UniversalE4vFunction(G_comb_2261[r][p], FSIModelsToLabels["hA2018_Final_NoRadCorr_LFGM"], "4He", TString::Format("%s",energies[r].c_str()), TString::Format("G18_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
-                                UniversalE4vFunction(Data_comb_2261[r][p], "Pinned Data", "4He", TString::Format("%s",energies[r].c_str()), TString::Format("Data_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
-
-                                SuSA_comb_2261[r][p]->GetXaxis()->SetRangeUser(prot_mom_cuts[r], 2.0);
-
-                                SuSA_comb_2261[r][p]->Draw("e hist");
-                                G_comb_2261[r][p]->Draw("e hist same");
-                                SuSA_comb_2261[r][p]->SetTitle("SuSA_v2 He");
-                                G_comb_2261[r][p]->SetTitle("G18 He");
-                                
-                                Data_comb_2261[r][p]->Draw("e same");
-                                Data_comb_2261[r][p]->SetTitle("Data He");
-                                Data_comb_2261[r][p]->SetMarkerColor(kBlack);
-                                Data_comb_2261[r][p]->SetMarkerStyle(20);
-
-                                findmaxhist(SuSA_comb_2261[r][p], Data_comb_2261[r][p], G_comb_2261[r][p]);
-                                
-                                G_comb_2261[r][p]->SetLineColor(kRed);
-
-                                tot_leg2261[r][p]->AddEntry(G_comb_2261[r][p]);
-                                tot_leg2261[r][p]->AddEntry(Data_comb_2261[r][p]);
-                                tot_leg2261[r][p]->AddEntry(SuSA_comb_2261[r][p]);
-                                tot_leg2261[r][p]->Draw();
-                                
-                                SuSA_comb_2261[r][p]->SetTitle(TString::Format("SuSA_v2 He %s", second_en[r][p].c_str()));
-                                total_reco_dist_canvas->SaveAs(TString::Format("4He/4He_%s_xsec.pdf", second_en[r][p].c_str()));
-                        }
+        TCanvas* total_reco_dist_canvas[4][2];
+        for(int r = 0; r < 4; r++) {
+                for(int p = 0; p < 2; p++) {
+        
+                        total_reco_dist_canvas[r][p] = new TCanvas(TString::Format("total reco can %i %i",r,p),TString::Format("total reco can %i %i",r,p),1200,1000);
+                        total_reco_dist_canvas[r][p]->SetLeftMargin( 0.2);
+                        total_reco_dist_canvas[r][p]->SetBottomMargin( 0.2);
+                        total_reco_dist_canvas[r][p]->SetRightMargin( 0.2);
                 }
         }
+
+        TLegend *tot_leg2261[4][2];
+        TLegend *tot_leg4461[1][2];
+
+        for(int r = 0; r < 4; r++) {
+                for (int p = 0; p < 2; p ++) {
+
+                        total_reco_dist_canvas[r][p]->cd();
+                        tot_leg2261[r][p] = new TLegend(.62,.65,.79,.85);
+                        tot_leg2261[r][p]->SetBorderSize(0);
+
+                        
+                        PrettyDoubleXSecPlot(SuSA_comb_2261[r][p], p, energy_val[energies[r]], r, sectors[r].size(),true);
+                        PrettyDoubleXSecPlot(Data_comb_2261[r][p], p, energy_val[energies[r]], r, sectors[r].size(),true);
+                        PrettyDoubleXSecPlot(G_comb_2261[r][p], p, energy_val[energies[r]], r, sectors[r].size(),true);
+                        PrettyDoubleXSecPlot(G_true_comb_2261[r][p], p, energy_val[energies[r]], r, sectors[r].size(),true);
+                        PrettyDoubleXSecPlot(SuSA_true_comb_2261[r][p], p, energy_val[energies[r]], r, sectors[r].size(),true);
+
+                        UniversalE4vFunction(SuSA_comb_2261[r][p], FSIModelsToLabels["SuSav2_NoRadCorr_LFGM_Truth_WithFidAcc"], "4He", TString::Format("%s",energies[r].c_str()), TString::Format("SuSA_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
+                        UniversalE4vFunction(G_comb_2261[r][p], FSIModelsToLabels["hA2018_Final_NoRadCorr_LFGM"], "4He", TString::Format("%s",energies[r].c_str()), TString::Format("G18_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
+                        UniversalE4vFunction(Data_comb_2261[r][p], "Data", "4He", TString::Format("%s",energies[r].c_str()), TString::Format("Data_%s_mom_reco_%i%i",energies[r].c_str(),r,p),r);
+
+                        if(p == 0) SuSA_comb_2261[r][p]->GetXaxis()->SetRangeUser(prot_mom_cuts[r], 2.0);
+
+                        SuSA_comb_2261[r][p]->Draw("e hist");
+                        G_comb_2261[r][p]->Draw("e hist same");
+                        SuSA_comb_2261[r][p]->SetTitle("SuSA_v2 He");
+                        G_comb_2261[r][p]->SetTitle("G18 He");
+
+                        //SuSA_true_comb_2261[r][p]->Draw("e hist same");
+                        //G_true_comb_2261[r][p]->Draw("e hist same");
+                        SuSA_true_comb_2261[r][p]->SetLineColor(kBlue);
+                        SuSA_true_comb_2261[r][p]->SetLineStyle(kDashed);
+                        G_true_comb_2261[r][p]->SetLineColor(kRed);
+                        G_true_comb_2261[r][p]->SetLineStyle(kDashed);
+                        
+			//Data_comb_2261[r][p]->Scale(1.35);
+                        Data_comb_2261[r][p]->Draw("e same");
+                        Data_comb_2261[r][p]->SetTitle("Data He");
+                        Data_comb_2261[r][p]->SetMarkerColor(kBlack);
+                        Data_comb_2261[r][p]->SetMarkerStyle(20);
+
+                        findmaxhist(SuSA_comb_2261[r][p], Data_comb_2261[r][p], G_comb_2261[r][p]);
+                        
+                        G_comb_2261[r][p]->SetLineColor(kRed);
+
+                        tot_leg2261[r][p]->AddEntry(G_comb_2261[r][p]);
+                        tot_leg2261[r][p]->AddEntry(Data_comb_2261[r][p]);
+                        tot_leg2261[r][p]->AddEntry(SuSA_comb_2261[r][p]);
+                        //tot_leg2261[r][p]->AddEntry(SuSA_true_comb_2261[r][p], "SuSAv2 true");
+                        //tot_leg2261[r][p]->AddEntry(G_true_comb_2261[r][p], "G18 true"); 
+                        tot_leg2261[r][p]->Draw();
+                        
+                        SuSA_comb_2261[r][p]->SetTitle(TString::Format("SuSA_v2 He %s", second_en[r][p].c_str()));
+                        total_reco_dist_canvas[r][p]->SaveAs(TString::Format("4He/4He_%s_xsec.pdf", second_en[r][p].c_str()));
+                }
+        }
+        
 
 }
 

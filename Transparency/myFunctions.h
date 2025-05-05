@@ -71,7 +71,7 @@ void GlobalSettings() {
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 
-void ReweightPlots(TH1D* h, int range = 0) {
+void ReweightPlots(TH1D* h, int n_sectors, int range = 0) {
 
 	double NBins = h->GetNbinsX(); 
 				
@@ -81,8 +81,9 @@ void ReweightPlots(TH1D* h, int range = 0) {
 		double error = h->GetBinError(i);
 		double width = h->GetBinWidth(i);
 		//std::cout << "width before = " << width << "\n";
-		if(range == 0 || range == 3) width *= 20*2*pow(TMath::DegToRad(),2);
-		if(range == 1 || range == 2) width *= 20*3*pow(TMath::DegToRad(),2); 
+		if(range == 0 || range == 3) width *= n_sectors*12*TMath::DegToRad()*std::abs(std::cos(21*TMath::DegToRad()) - std::cos(23*TMath::DegToRad())); 
+                if(range == 1) width *= n_sectors*12*TMath::DegToRad()*std::abs(std::cos(28*TMath::DegToRad()) - std::cos(31*TMath::DegToRad()));
+                if(range == 2) width *= n_sectors*12*TMath::DegToRad()*std::abs(std::cos(37*TMath::DegToRad()) - std::cos(40*TMath::DegToRad()));
 		double newcontent = content / width;
 		double newerror = error / width;				
 		h->SetBinContent(i,newcontent);
@@ -281,7 +282,7 @@ TString ToStringDouble(double num) {
 
 // -------------------------------------------------------------------------------------------------------------------------------------
 
-void PrettyDoubleXSecPlot(TH1D* h, int p, double E, int r ,bool xsec = false) {
+void PrettyDoubleXSecPlot(TH1D* h, int p, double E, int r ,int n_sectors, bool xsec = false) {
 
 	// ----------------------------------------------------------------------------------------------------------------
 
@@ -299,7 +300,7 @@ void PrettyDoubleXSecPlot(TH1D* h, int p, double E, int r ,bool xsec = false) {
 	//h->GetXaxis()->SetTitleOffset(1.05);
 	h->GetXaxis()->SetNdivisions(Ndivisions);
 	if (p == 0) {
-		h->GetXaxis()->SetRangeUser(0.2,2.);
+		h->GetXaxis()->SetRangeUser(0.2,2.2);
 		h->GetXaxis()->SetTitle("Proton Momentum (GeV)");
 	}
 	if (p == 1) {
@@ -308,9 +309,8 @@ void PrettyDoubleXSecPlot(TH1D* h, int p, double E, int r ,bool xsec = false) {
 		h->GetXaxis()->SetTitle("Electron Momentum (GeV)");
 	}
 	if (xsec == true) {
-		if(p == 0) h->GetYaxis()->SetTitle("d#sigma/dp (1e-38 cm2/rad^{2} GeV)");
-		if(p == 1) h->GetYaxis()->SetTitle("d#sigma/dp (1e-38 cm2/rad GeV)");
-		ReweightPlots(h,r);
+		h->GetYaxis()->SetTitle("d#sigma/dp (#mub/sr/GeV)");
+		ReweightPlots(h,n_sectors,r);
 	}
         if (xsec == false) h->GetYaxis()->SetTitle("Scaled Number of Events");
 
@@ -557,11 +557,20 @@ void AbsoluteXSecScaling(TH1D* h, TString Sample, TString Nucleus, TString E) {
 
 	}
 	
-	else  if(Sample == "SF") {
-                SF = (SFGenieXsec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
-                                        ConversionFactorCm2ToMicroBarn / (SFNumberEvents[std::make_pair(Nucleus, E)] ) );
+
+	else if (Sample == "Fortran SF hN NoRad") {
+
+                                SF = (FortranSFhNGenieXSec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
+                                        ConversionFactorCm2ToMicroBarn / (NoRadFortranSFhNNumberEvents[std::make_pair(Nucleus, E)] ) ) ;
+
         }
-	
+
+	else if (Sample == "SuSav2 CFG NoRad") {
+
+				SF = (SuSAv2hNCFGGenieXsec[std::make_pair(Nucleus, E)] * TMath::Power(10.,-38.) *\
+                                        ConversionFactorCm2ToMicroBarn / (NoRadSuSAv2CFGhNNumberEvents[std::make_pair(Nucleus, E)] ) ) ;
+
+	}
 
 //	else if (Sample == "G18_02c NoRad") { 
 
